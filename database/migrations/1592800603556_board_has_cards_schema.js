@@ -6,10 +6,11 @@ const Schema = use('Schema')
 class BoardHasCardsSchema extends Schema {
   up () {
     this.create('board_has_cards', (table) => {
-      table.integer('board_id').unsigned().references('id').inTable('board')
-      table.integer('cards_id').unsigned().references('id').inTable('cards')
-      table.integer('selected')
-      table.integer('position')
+      table.increments()
+      table.integer('board_id').unsigned().references('id').inTable('boards')
+      table.integer('card_id').unsigned().references('id').inTable('cards')
+      table.string('selected')
+      table.string('position')
     })
   }
 

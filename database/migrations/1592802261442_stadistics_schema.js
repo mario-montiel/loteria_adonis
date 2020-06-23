@@ -9,6 +9,7 @@ class StadisticsSchema extends Schema {
       table.increments()
       table.integer('wins')
       table.integer('lost')
+      table.integer('user_id').unsigned().references('id').inTable('users')
     })
   }
 
