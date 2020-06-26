@@ -15,4 +15,4 @@
 
 const Ws = use('Ws')
 
-Ws.channel('loteria', 'LoteriaController')
+Ws.channel('loteria', 'LoteriaController').middleware('auth')
