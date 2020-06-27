@@ -3,7 +3,7 @@ const User = use('App/Models/User')
 const Game = use('App/Models/Game')
 
 class LoteriaController {
-  constructor ({ socket, request }) {
+  constructor({ socket, request }) {
     this.socket = socket
     this.request = request
   }
@@ -24,13 +24,9 @@ class LoteriaController {
 
       // in case the game is waiting for users
       if (status == 'preparing') {
-        let activeUsers = await User.query() .where('status', 'active').getCount()
+        let activeUsers = await User.query().where('status', 'active').getCount()
         if (activeUsers > 1) {
-          //function myFunc(arg) {
-            //console.log(`arg was => ${arg}`);
-          //}
-
-          //setTimeout(myFunc, 30000, 'funky');
+          this._runTimer()
         }
       }
       // in case the game is in progress
@@ -51,7 +47,21 @@ class LoteriaController {
   }
 
   async onClose(id) {
+    let user = await User.find(id)
+    if (!user) { return }
 
+    user.status = 'inactive'
+    await user.save()
+  }
+
+  async _runTimer() {
+    let sec = 30
+    function timerBroadcast() {
+      sec--
+      this.socket.broadcastToAll('timer', sec)
+    }
+
+    setTimeout(timerBroadcast, 30000);
   }
 }
 

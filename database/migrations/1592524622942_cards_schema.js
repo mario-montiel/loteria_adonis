@@ -7,7 +7,8 @@ class CardsSchema extends Schema {
   up () {
     this.create('cards', (table) => {
       table.increments()
-      table.string('location')
+      table.string('name', 14)
+      table.string('path', 30)
     })
   }
 
