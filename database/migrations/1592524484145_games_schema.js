@@ -7,7 +7,7 @@ class GamesSchema extends Schema {
   up () {
     this.create('games', (table) => {
       table.increments()
-      table.string('status', 9).defaultTo('inactive') // preparing | playing
+      table.string('status', 9).defaultTo('inactive') // inactive | preparing | playing
     })
   }
 
