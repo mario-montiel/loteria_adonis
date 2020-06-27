@@ -1,6 +1,5 @@
 'use strict'
 const User = use('App/Models/User')
-const Game = use('App/Models/Game')
 
 class AuthController {
   async login({ request, auth }) {
@@ -10,20 +9,6 @@ class AuthController {
     let user = await User.findBy('email', email)
 
     return this._user(token, user)
-  }
-
-  async pifi1({request,auth}){
-    let game = await Game.query().fetch()
-    return game
-  }
-  async pifi({request, response}){
-    const status = request.input('status')
-
-    const games = new Game()
-    games.status = status
-
-    await games.save()
-    return response.json(games)
   }
 
   async logout() { await auth.logout() }
