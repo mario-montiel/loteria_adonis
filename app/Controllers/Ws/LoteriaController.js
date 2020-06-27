@@ -1,6 +1,6 @@
 'use strict'
 const User = use('App/Models/User')
-const Game = use('App/Models/Game')
+//const Game = use('App/Models/Game')
 
 class LoteriaController {
   constructor({ socket, request }) {
@@ -16,14 +16,37 @@ class LoteriaController {
     await user.save()
 
     // BROADCAST connected user
-    this.socket.broadcast('user', user)
+    this.socket.broadcast('connUser', user)
 
     let game = await Game.first()
     if (game) {
-      let status = game.status
+      let activeUsers = await User.query().where('status', 'active').getCount()
 
-      // in case the game is waiting for users
-      if (status == 'preparing') {
+      switch(game.status) {
+        // in case the game is waiting for users
+        case 'inactive':
+          if (activeUsers > 1) {
+            game.status = 'preparing'
+            game.save()
+
+            this._runTimer(game.id)
+
+            // The game status could change if users disconnect letting one conncected
+            game = game.find(game.id)
+            if (game.status == 'preparing') {
+              //this.socket.broadcastToAll()
+            }
+          }
+          break
+        // the game has already started
+        case 'playing':
+          this.socket.broadcast
+          break
+        // the game is waiting for users before it can start
+        case 'preparing':
+          break
+      }
+      /*else if (status == 'preparing') {
         let activeUsers = await User.query().where('status', 'active').getCount()
         if (activeUsers > 1) {
           this._runTimer()
@@ -32,7 +55,7 @@ class LoteriaController {
       // in case the game is in progress
       else if (status == 'playing') {
 
-      }
+      }*/
     }
     else {
       game = new Game()
@@ -54,14 +77,17 @@ class LoteriaController {
     await user.save()
   }
 
-  async _runTimer() {
-    let sec = 30
+  async _runTimer(game_id) {
+    let sec = 30, timer = 0
     function timerBroadcast() {
+      game = Game.find(game_id)
+      if (game.status == 'inactive') { clearTimeout(timer) }
+
       sec--
       this.socket.broadcastToAll('timer', sec)
     }
 
-    setTimeout(timerBroadcast, 30000);
+    timer = setTimeout(timerBroadcast, 30000);
   }
 }
 
