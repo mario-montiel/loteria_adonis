@@ -3,7 +3,7 @@
 /** @type {typeof import('@adonisjs/lucid/src/Lucid/Model')} */
 const Model = use('Model')
 
-class Card extends Model {
+class Game extends Model {
 	static get createdAtColumn () {
 		return null
 	}
@@ -12,4 +12,4 @@ class Card extends Model {
 	}
 }
 
-module.exports = Card
+module.exports = Game
