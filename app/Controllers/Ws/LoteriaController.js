@@ -34,28 +34,24 @@ class LoteriaController {
             // The game status could change if users disconnect letting one conncected
             game = game.find(game.id)
             if (game.status == 'preparing') {
-              //this.socket.broadcastToAll()
+              game.status = 'playing'
+              await game.status()
+
+              this.socket.broadcastToAll('gameStatus', 'START') // START status is an advice
+
+              // GENERATING GAME NECESSARY DATA
             }
           }
           break
         // the game has already started
         case 'playing':
-          this.socket.broadcast
+          this.socket.broadcast('gameStatus', 'playing')
           break
         // the game is waiting for users before it can start
         case 'preparing':
+
           break
       }
-      /*else if (status == 'preparing') {
-        let activeUsers = await User.query().where('status', 'active').getCount()
-        if (activeUsers > 1) {
-          this._runTimer()
-        }
-      }
-      // in case the game is in progress
-      else if (status == 'playing') {
-
-      }*/
     }
     else {
       game = new Game()
