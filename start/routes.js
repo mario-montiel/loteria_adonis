@@ -11,7 +11,9 @@
 const Route = use('Route')
 
 Route.get('', () => {
-  return { greeting: "Hello, I'm a loteria API" }
+  return {
+    greeting: "Hello, I'm a loteria API"
+  }
 })
 
 Route.group(() => {
@@ -19,3 +21,4 @@ Route.group(() => {
   Route.post('signup', 'AuthController.signup')
   Route.get('logout', 'AuthController.logout').middleware('auth')
 }).prefix('api')
+
