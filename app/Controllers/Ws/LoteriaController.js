@@ -37,6 +37,8 @@ class LoteriaController {
               game.status = 'playing'
               await game.status()
 
+              activeUsers = await User.query().where('status', 'active').fetch()
+
               this.socket.broadcastToAll('gameStatus', 'START') // START status is an advice
 
               // GENERATING GAME NECESSARY DATA
@@ -49,7 +51,7 @@ class LoteriaController {
           break
         // the game is waiting for users before it can start
         case 'preparing':
-
+          // I don't know what to do here :c It's Mario's fault
           break
       }
     }
