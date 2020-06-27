@@ -1,6 +1,6 @@
 'use strict'
 const User = use('App/Models/User')
-//const Game = use('App/Models/Game')
+const Game = use('App/Models/Game')
 
 class LoteriaController {
   constructor({ socket, request }) {
@@ -59,11 +59,13 @@ class LoteriaController {
       game = new Game()
       game.status = 'preparing'
     }
-
-    //this.socket.broadcast()
   }
 
-  async onCheck() {
+  async onCardSelect() {
+
+  }
+
+  async onWin() {
 
   }
 
