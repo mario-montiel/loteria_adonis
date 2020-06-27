@@ -11,7 +11,9 @@
 const Route = use('Route')
 
 Route.get('', () => {
-  return { greeting: "Hello, I'm a loteria API" }
+  return {
+    greeting: "Hello, I'm a loteria API"
+  }
 })
 
 Route.group(() => {
@@ -21,3 +23,4 @@ Route.group(() => {
   Route.get('pifi1', 'AuthController.pifi1')
   Route.post('pifi', 'AuthController.pifi')
 }).prefix('api')
+
