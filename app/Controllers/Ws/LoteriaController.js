@@ -7,17 +7,10 @@ const Board = use('App/Models/Board')
 
 const shuffle = require('shuffle-array')
 
-const currentCard = {
-  id: 0,
-  name: 'unknown',
-  path: 'unknown'
-}
+const currentCard = { id: 0, name: 'unknown', path: 'unknown' }
 
 class LoteriaController {
-  constructor({
-    socket,
-    request
-  }) {
+  constructor({ socket, request }) {
     this.socket = socket
     this.request = request
     this.gano = "no"
