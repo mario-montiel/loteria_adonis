@@ -31,55 +31,67 @@ class LoteriaController {
 
     user.status = 'active'
     await user.save()
+    //CREATE BOARD
+    const newBoard = new Board();
+    newBoard.user_id = params.id;
+    await newBoard.save();
+    const card = await Card.all()
+    const shuffleCards = shuffle(card.rows)
+
+    for (let i = 0; i <= 15; i++) {
+      const extractCard = shuffleCards.pop()
+      const boardHasCards = new BoardHasCard();
+      boardHasCards.board_id = newBoard.id;
+      boardHasCards.card_id = await extractCard.id
+      boardHasCards.position = i;
+      boardHasCards.save();
+    }
 
     // BROADCAST connected user
     this.socket.broadcast('connUser', user)
 
     let game = await Game.first()
-    if (game) {
-      let activeUsers = await User.query().where('status', 'active').getCount()
-      switch (game.status) {
-        // in case the game is waiting for users
-        case 'inactive':
-          if (activeUsers > 1) {
-            game.status = 'preparing'
-            game.save()
 
-            this._runTimer(game.id)
+    if (!game) {
+      game = await new Game()
+      game.status = 'inactive'
+      await game.save()
+    }
 
-            // The game status could change if users disconnect letting one conncected
-            game = game.find(game.id)
-            if (game.status == 'preparing') {
-              game.status = 'playing'
-              await game.status()
+    let activeUsers = await User.query().where('status', 'active').getCount()
 
-              activeUsers = await User.query().where('status', 'active').fetch()
+    if (activeUsers > 1) {
+      status = game.status
 
-              this.socket.broadcastToAll('gameStatus', 'START') // START status is an advice
-              //SI FUNCIONA COMPROBADO (ESPERO :'V)
-              const newBoard = new Board();
-              newBoard.user_id = id;
-              await newBoard.save();
-              //CREATE BOARD WITH CARDS
-              
+      if (status == 'inactive') {
+        game.status = 'preparing'
+        await game.save()
 
-              this._startGame(game)
-              // GENERATING GAME NECESSARY DATA
-            }
-          }
-          break
-          // the game has already started
-        case 'playing':
-          this.socket.broadcast('gameStatus', 'playing')
-          break
-          // the game is waiting for users before it can start
-        case 'preparing':
-          // I don't know what to do here :c It's Mario's fault
-          break
+        this._runTimer(game.id)
+
+        // The game status could change if users disconnect letting one conncected
+        game = await game.find(game.id)
+        if (game.status == 'preparing') {
+          game.status = 'playing'
+          await game.save()
+
+          activeUsers = await User.query().where('status', 'active').fetch()
+
+          this.socket.broadcastToAll('gameStatus', 'START') // START status is an advice
+
+          this._startGame(game)
+          // GENERATING GAME NECESSARY DATA
+        }
       }
-    } else {
-      game = new Game()
-      game.status = 'preparing'
+
+      if (status == 'playing') {
+        this.socket.broadcastToAll('gameStatus', 'playing')
+        return
+      }
+
+      if (game.status == 'preparing') {
+        this.socket.broadcastToAll('gameStatus', 'preparing')
+      }
     }
   }
 
@@ -117,7 +129,7 @@ class LoteriaController {
         c3 = borcards.rows[9].selected
         c4 = borcards.rows[10].selected
         this._winner4(c1, c2, c3, c4)
-        this._menssagewin(quien.id)
+        this._messagewin(quien.id)
         this.gano = "no"
         break
       case 'full':
@@ -200,34 +212,34 @@ class LoteriaController {
                           c4 = borcards.rows[12].selected
                           this._winner4(c1, c2, c3, c4)
                           if (this.gano == "no") {
-                            this._menssagewin(quien.id)
+                            this._messagewin(quien.id)
                           }
                         } else {
-                          this._menssagewin(quien.id)
+                          this._messagewin(quien.id)
                         }
                       } else {
-                        this._menssagewin(quien.id)
+                        this._messagewin(quien.id)
                       }
                     } else {
-                      this._menssagewin(quien.id)
+                      this._messagewin(quien.id)
                     }
                   } else {
-                    this._menssagewin(quien.id)
+                    this._messagewin(quien.id)
                   }
                 } else {
-                  this._menssagewin(quien.id)
+                  this._messagewin(quien.id)
                 }
               } else {
-                this._menssagewin(quien.id)
+                this._messagewin(quien.id)
               }
             } else {
-              this._menssagewin(quien.id)
+              this._messagewin(quien.id)
             }
           } else {
-            this._menssagewin(quien.id)
+            this._messagewin(quien.id)
           }
         } else {
-          this._menssagewin(quien.id)
+          this._messagewin(quien.id)
         }
         this.gano = "no"
         break
@@ -258,7 +270,7 @@ class LoteriaController {
       this.socket.broadcastToAll('timer', sec)
     }
 
-    timer = setTimeout(timerBroadcast, 30000);
+    timer = setTimeout(timerBroadcast, 30000)
   }
 
   async _startGame(game) {
@@ -296,7 +308,7 @@ class LoteriaController {
     }
   }
 
-  async _menssagewin(id) {
+  async _messagewin(id) {
     if (this.gano == "si") {
       this.socket.broadcastToAll('onWin', {
         user_id: id,
