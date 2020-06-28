@@ -7,14 +7,19 @@ const Board = use('App/Models/Board')
 const currentCardId = 0
 
 class LoteriaController {
-  constructor({ socket, request }) {
+  constructor({
+    socket,
+    request
+  }) {
     this.socket = socket
     this.request = request
   }
 
   async onJoin(id) {
     let user = await User.find(id)
-    if (!user) { return }
+    if (!user) {
+      return
+    }
 
     user.status = 'active'
     await user.save()
@@ -26,7 +31,7 @@ class LoteriaController {
     if (game) {
       let activeUsers = await User.query().where('status', 'active').getCount()
 
-      switch(game.status) {
+      switch (game.status) {
         // in case the game is waiting for users
         case 'inactive':
           if (activeUsers > 1) {
@@ -49,17 +54,16 @@ class LoteriaController {
             }
           }
           break
-        // the game has already started
+          // the game has already started
         case 'playing':
           this.socket.broadcast('gameStatus', 'playing')
           break
-        // the game is waiting for users before it can start
+          // the game is waiting for users before it can start
         case 'preparing':
           // I don't know what to do here :c It's Mario's fault
           break
       }
-    }
-    else {
+    } else {
       game = new Game()
       game.status = 'preparing'
     }
@@ -67,8 +71,8 @@ class LoteriaController {
 
   async onCardSelect(data) {
     let correctCard = data.card_id == currentCardId ? true : false
-    let board = await BoardCards.query() .where('board_id', data.board_id)
-    .andWhere('card_id'. data.card_id) .first() .fetch()
+    let board = await BoardCards.query().where('board_id', data.board_id)
+      .andWhere('card_id'.data.card_id).first().fetch()
     let success = false
 
     if (board && correctCard) {
@@ -88,17 +92,22 @@ class LoteriaController {
     let user = await User.find(quien.id)
     let board = await Board.findBy('user_id', user.id)
     let borcards = await board.boardhascard().fetch()
-    switch(quien.como){
+    switch (quien.como) {
       case 'centro':
-      let gano = true
+        let gano = true
         for (var i = 0; i < borcards.length; i++) {
-          switch(borcards[i]){
-            case 5: if(borcards[i].selected == 1){
-              this.socket.broadcastToAll("message", borcards)
-              } break
-            case 6: break
-            case 9: break
-            case 10: break
+          switch (borcards[i]) {
+            case 5:
+              if (borcards[i].selected == 1) {
+                this.socket.broadcastToAll("message", borcards)
+              }
+              break
+            case 6:
+              break
+            case 9:
+              break
+            case 10:
+              break
           }
         }
         break
@@ -107,23 +116,45 @@ class LoteriaController {
 
   async onClose(id) {
     let user = await User.find(id)
-    if (!user) { return }
+    if (!user) {
+      return
+    }
 
     user.status = 'inactive'
     await user.save()
   }
 
   async _runTimer(game_id) {
-    let sec = 30, timer = 0
+    let sec = 30,
+      timer = 0
+
     function timerBroadcast() {
       game = Game.find(game_id)
-      if (game.status == 'inactive') { clearTimeout(timer) }
+      if (game.status == 'inactive') {
+        clearTimeout(timer)
+      }
 
       sec--
       this.socket.broadcastToAll('timer', sec)
     }
 
     timer = setTimeout(timerBroadcast, 30000);
+  }
+  async onShuffle() {
+    const card = await Card.all()
+    const shuffleCards = shuffle(card.rows)
+    const extractCards = shuffleCards.pop()
+    return extractCards;
+  }
+  async onBoard(user_id) {
+    console.log(user_id);
+    let user = await Board.find(user_id)
+    console.log(user)
+    let board = await Board.findBy('user_id', user.user_id)
+    console.log(board);
+    let newBoard = new Board()
+    newBoard.user_id = board.user_id;
+    await newBoard.save();
   }
 }
 

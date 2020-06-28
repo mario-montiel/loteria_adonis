@@ -13,10 +13,12 @@ class PruebonController {
     const extractCards = shuffleCards.pop()
     return extractCards;
   }
-  async userBoard(id) {
-    const board = new Board();
-    let findUser = await board.user().find(id);
-    return findUser;
+  async userBoard(data) {
+    // console.log(data);
+    // let user = await User.find(data.id)
+    // let board = await Board.findBy('user_id', user.id)
+    // let borcards = await board.boardhascard().fetch()
+      let newBoard = new Board()
   }
 }
 

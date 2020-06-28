@@ -23,4 +23,4 @@ Route.group(() => {
 }).prefix('api')
 
 Route.get('board', 'PruebonController.board');
-Route.get('board2/:id', 'PruebonController.userBoard');
+Route.get('board2/:data', 'PruebonController.userBoard');
