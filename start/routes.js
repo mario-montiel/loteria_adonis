@@ -21,7 +21,3 @@ Route.group(() => {
   Route.post('signup', 'AuthController.signup')
   Route.get('logout', 'AuthController.logout').middleware('auth')
 }).prefix('api')
-
-Route.get('board', 'PruebonController.board');
-Route.get('board2/:id', 'PruebonController.userBoard');
-Route.get('board3/', 'PruebonController.boardHasCards');
