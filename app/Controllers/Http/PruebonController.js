@@ -13,12 +13,15 @@ class PruebonController {
     const extractCards = shuffleCards.pop()
     return extractCards;
   }
-  async userBoard(data) {
-    // console.log(data);
-    // let user = await User.find(data.id)
-    // let board = await Board.findBy('user_id', user.id)
-    // let borcards = await board.boardhascard().fetch()
-      let newBoard = new Board()
+  async userBoard() {
+    const activeUsers = await User.query().where('status', 'active').fetch()
+    //console.log(activeUsers.rows[0].id)
+    const idActiveUser = activeUsers.rows[0].id
+    console.log(idActiveUser);
+    const newBoard = new Board();
+    newBoard.user_id = idActiveUser;
+    await newBoard.save();
+
   }
 }
 

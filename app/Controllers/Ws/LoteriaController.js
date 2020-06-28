@@ -31,7 +31,6 @@ class LoteriaController {
     let game = await Game.first()
     if (game) {
       let activeUsers = await User.query().where('status', 'active').getCount()
-
       switch (game.status) {
         // in case the game is waiting for users
         case 'inactive':
@@ -50,6 +49,13 @@ class LoteriaController {
               activeUsers = await User.query().where('status', 'active').fetch()
 
               this.socket.broadcastToAll('gameStatus', 'START') // START status is an advice
+              //SI FUNCIONA COMPROBADO (ESPERO :'V)
+              const idActiveUser = activeUsers.rows[0].id
+              console.log(idActiveUser);
+              const newBoard = new Board();
+              newBoard.user_id = idActiveUser;
+              await newBoard.save();
+
               this._startGame(game)
               // GENERATING GAME NECESSARY DATA
             }
@@ -95,20 +101,25 @@ class LoteriaController {
     let borcards = await board.boardhascard().fetch()
     switch (quien.como) {
       case 'centro':
-        let gano = "nada"
         let c1 = borcards.rows[5].selected
         let c2 = borcards.rows[6].selected
         let c3 = borcards.rows[9].selected
         let c4 = borcards.rows[10].selected
         if (c1 == 1 && c2 == 1 && c3 == 1 && c4 == 1) {
           this.socket.broadcastToAll('onWin', {
-            "todo bien"
+            user_id: quien.id,
+            win: "yes"
           })
         } else {
-          this.socket.broadcastToAll("message", "no sea mentiroso we")
+          this.socket.broadcastToAll('onWin', {
+            user_id: quien.id,
+            win: "no"
+          })
         }
         break
       case 'loteria':
+        //
+        break
     }
   }
 
@@ -144,6 +155,7 @@ class LoteriaController {
     const rdmCards = shuffle(cards)
     game.cards().createMany(rdmCards)
   }
+
 }
 
 module.exports = LoteriaController
