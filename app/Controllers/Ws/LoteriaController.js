@@ -11,6 +11,7 @@ class LoteriaController {
   constructor({ socket, request }) {
     this.socket = socket
     this.request = request
+    this.gano = "no"
   }
 
   async onJoin(id) {
@@ -89,26 +90,93 @@ class LoteriaController {
     let user = await User.find(quien.id)
     let board = await Board.findBy('user_id', user.id)
     let borcards = await board.boardhascard().fetch()
+    let c1 = 1
+    let c2 = 1
+    let c3 = 1
+    let c4 = 1
     switch(quien.como){
       case 'centro':
-        let c1 = borcards.rows[5].selected
-        let c2 = borcards.rows[6].selected
-        let c3 = borcards.rows[9].selected
-        let c4 = borcards.rows[10].selected
-        if (c1 == 1 && c2 == 1 && c3 == 1 && c4 == 1) {
-          this.socket.broadcastToAll('onWin', {
-            user_id: quien.id,
-            win: "yes"
-          })
-        }else{
-          this.socket.broadcastToAll('onWin', {
-            user_id: quien.id,
-            win: "no"
-          })
-        }
+        c1 = borcards.rows[5].selected
+        c2 = borcards.rows[6].selected
+        c3 = borcards.rows[9].selected
+        c4 = borcards.rows[10].selected
+        this._winner4(c1, c2, c3, c4)
+        this._menssagewin(quien.id)
+        this.gano = "no"
         break
       case 'loteria':
-        //
+        c1 = borcards.rows[0].selected
+        c2 = borcards.rows[1].selected
+        c3 = borcards.rows[2].selected
+        c4 = borcards.rows[3].selected
+        this._winner4(c1, c2, c3, c4)
+        if(this.gano == "no"){
+          c1 = borcards.rows[4].selected
+          c2 = borcards.rows[5].selected
+          c3 = borcards.rows[6].selected
+          c4 = borcards.rows[7].selected
+          this._winner4(c1, c2, c3, c4)
+          if (this.gano == "no") {
+            c1 = borcards.rows[8].selected
+            c2 = borcards.rows[9].selected
+            c3 = borcards.rows[10].selected
+            c4 = borcards.rows[11].selected
+            this._winner4(c1, c2, c3, c4)
+            if (this.gano == "no") {
+              c1 = borcards.rows[12].selected
+              c2 = borcards.rows[13].selected
+              c3 = borcards.rows[14].selected
+              c4 = borcards.rows[15].selected
+              this._winner4(c1, c2, c3, c4)
+              if (this.gano == "no") {
+                c1 = borcards.rows[0].selected
+                c2 = borcards.rows[4].selected
+                c3 = borcards.rows[8].selected
+                c4 = borcards.rows[12].selected
+                this._winner4(c1, c2, c3, c4)
+                if (this.gano == "no") {
+                  c1 = borcards.rows[1].selected
+                  c2 = borcards.rows[5].selected
+                  c3 = borcards.rows[9].selected
+                  c4 = borcards.rows[13].selected
+                  this._winner4(c1, c2, c3, c4)
+                  if (this.gano == "no") {
+                    c1 = borcards.rows[2].selected
+                    c2 = borcards.rows[6].selected
+                    c3 = borcards.rows[10].selected
+                    c4 = borcards.rows[14].selected
+                    this._winner4(c1, c2, c3, c4)
+                    if (this.gano == "no") {
+                      c1 = borcards.rows[3].selected
+                      c2 = borcards.rows[7].selected
+                      c3 = borcards.rows[11].selected
+                      c4 = borcards.rows[15].selected
+                      this._winner4(c1, c2, c3, c4)
+                      if (this.gano == "no") {
+                        c1 = borcards.rows[0].selected
+                        c2 = borcards.rows[5].selected
+                        c3 = borcards.rows[10].selected
+                        c4 = borcards.rows[15].selected
+                        this._winner4(c1, c2, c3, c4)
+                        if (this.gano == "no") {
+                          c1 = borcards.rows[3].selected
+                          c2 = borcards.rows[6].selected
+                          c3 = borcards.rows[9].selected
+                          c4 = borcards.rows[12].selected
+                          this._winner4(c1, c2, c3, c4)
+                          if(this.gano == "no"){
+                            this._menssagewin(quien.id)
+                          }
+                        }else{ this._menssagewin(quien.id)}
+                      }else{ this._menssagewin(quien.id)}
+                    }else{ this._menssagewin(quien.id)}
+                  }else{ this._menssagewin(quien.id)}
+                }else{ this._menssagewin(quien.id)}
+              }else{ this._menssagewin(quien.id)}
+            }else{ this._menssagewin(quien.id)}
+          }else{ this._menssagewin(quien.id)}
+        }else{ this._menssagewin(quien.id)}
+        this.gano = "no"
         break
     }
   }
@@ -139,6 +207,25 @@ class LoteriaController {
     const rdmCards = shuffle(cards)
 
     game.cards().createMany(rdmCards)
+  }
+
+  async _winner4(c1, c2, c3, c4){
+    if (c1 == 1 && c2 == 1 && c3 == 1 && c4 == 1) {
+      this.gano = "si"
+    }
+  }
+  async _menssagewin(id){
+    if (this.gano == "si") {
+      this.socket.broadcastToAll('onWin', {
+        user_id: id,
+        win: "yes"
+      })
+    }else{
+      this.socket.broadcastToAll('onWin', {
+        user_id: id,
+        win: "no"
+      })
+    }
   }
 }
 
