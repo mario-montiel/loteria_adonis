@@ -1,6 +1,6 @@
 'use strict'
 const User = use('App/Models/User')
-const BoardHasCard = use('App/Models/BoardHasCard')
+// const BoardHasCard = use('App/Models/BoardHasCard')
 
 class AuthController {
   async login({ request, auth }) {
@@ -19,10 +19,11 @@ class AuthController {
     return user
   }
 
-  async pifi({request,auth}){
-    let juegycartas = await BoardHasCard.query().fetch()
+  /*async pifi({request,auth}){
+    let popo = await BoardHasCard.find('1')
+    let juegycartas = await popo.cards().fetch()
     return juegycartas
-  }
+  }*/
 
   async signup({ request, auth }) {
     const data = request.only(['username', 'email', 'password'])
