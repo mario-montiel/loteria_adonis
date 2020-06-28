@@ -14,24 +14,32 @@ class PruebonController {
     const extractCards = shuffleCards.pop()
     return extractCards;
   }
-  async userBoard() {
-    const activeUsers = await User.query().where('status', 'active').fetch()
-    //console.log(activeUsers.rows[0].id)
-    const idActiveUser = activeUsers.rows[0].id
-    console.log(idActiveUser);
+  async userBoard({
+    params
+  }) {
     const newBoard = new Board();
-    newBoard.user_id = idActiveUser;
+    newBoard.user_id = params.id;
     await newBoard.save();
+    const card = await Card.all()
+    const shuffleCards = shuffle(card.rows)
 
+    for (let i = 0; i <= 15; i++) {
+      const extractCard = shuffleCards.pop()
+      const boardHasCards = new BoardHasCard();
+      boardHasCards.board_id = newBoard.id;
+      boardHasCards.card_id = await extractCard.id
+      boardHasCards.position = i;
+      boardHasCards.save();
+    }
   }
   //un ciclo con los usuarios
   async boardHasCards() {
 
-    const activeUsers = await User.query().where('status', 'active').fetch()
-    //console.log(activeUsers.rows[0].id)
-    const idActiveUser = activeUsers.rows[0].id
-    const idBoard = await Board.last(); //la última carta
-    const aux = await idBoard.id
+    // const activeUsers = await User.query().where('status', 'active').fetch()
+    // //console.log(activeUsers.rows[0].id)
+    // const idActiveUser = activeUsers.rows[0].id
+    // const idBoard = await Board.last(); //la última carta
+    // const aux = await idBoard.id
 
     for (let i = 0; i <= 15; i++) {
       const card = await Card.all()

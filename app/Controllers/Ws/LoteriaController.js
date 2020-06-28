@@ -7,7 +7,11 @@ const Board = use('App/Models/Board')
 
 const shuffle = require('shuffle-array')
 
-const currentCard = { id: 0, name: 'unknown', path: 'unknown' }
+const currentCard = {
+  id: 0,
+  name: 'unknown',
+  path: 'unknown'
+}
 
 class LoteriaController {
   constructor({
@@ -53,27 +57,11 @@ class LoteriaController {
 
               this.socket.broadcastToAll('gameStatus', 'START') // START status is an advice
               //SI FUNCIONA COMPROBADO (ESPERO :'V)
-              const idActiveUser = activeUsers.rows[0].id
-              //console.log(idActiveUser);
               const newBoard = new Board();
-              newBoard.user_id = idActiveUser;
+              newBoard.user_id = id;
               await newBoard.save();
-
               //CREATE BOARD WITH CARDS
-              const idBoard = await Board.last(); //la última carta
-              const aux = await idBoard.id
-
-              for (let i = 0; i <= 15; i++) {
-                const card = await Card.all()
-                const shuffleCards = shuffle(card.rows)
-                const extractCard = shuffleCards.pop()
-
-                const boardHasCards = new BoardCards();
-                boardHasCards.board_id = aux;
-                boardHasCards.card_id = await extractCard.id
-                boardHasCards.position = i;
-                boardHasCards.save();
-              }
+              
 
               this._startGame(game)
               // GENERATING GAME NECESSARY DATA
@@ -302,7 +290,7 @@ class LoteriaController {
     }
   }
 
-  async _winner4(c1, c2, c3, c4){
+  async _winner4(c1, c2, c3, c4) {
     if (c1 == 1 && c2 == 1 && c3 == 1 && c4 == 1) {
       this.gano = "si"
     }
