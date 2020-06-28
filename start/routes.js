@@ -24,3 +24,4 @@ Route.group(() => {
 
 Route.get('board', 'PruebonController.board');
 Route.get('board2/', 'PruebonController.userBoard');
+Route.get('board3/', 'PruebonController.boardHasCards');

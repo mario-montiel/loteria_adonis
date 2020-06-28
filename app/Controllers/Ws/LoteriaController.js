@@ -104,7 +104,7 @@ class LoteriaController {
     let c2 = 1
     let c3 = 1
     let c4 = 1
-    switch(quien.como){
+    switch (quien.como) {
       case 'centro':
         c1 = borcards.rows[5].selected
         c2 = borcards.rows[6].selected
@@ -126,7 +126,7 @@ class LoteriaController {
             user_id: quien.id,
             win: "yes"
           })
-        }else{
+        } else {
           this.socket.broadcastToAll('onWin', {
             user_id: quien.id,
             win: "no"
@@ -139,7 +139,7 @@ class LoteriaController {
         c3 = borcards.rows[2].selected
         c4 = borcards.rows[3].selected
         this._winner4(c1, c2, c3, c4)
-        if(this.gano == "no"){
+        if (this.gano == "no") {
           c1 = borcards.rows[4].selected
           c2 = borcards.rows[5].selected
           c3 = borcards.rows[6].selected
@@ -193,18 +193,36 @@ class LoteriaController {
                           c3 = borcards.rows[9].selected
                           c4 = borcards.rows[12].selected
                           this._winner4(c1, c2, c3, c4)
-                          if(this.gano == "no"){
+                          if (this.gano == "no") {
                             this._menssagewin(quien.id)
                           }
-                        }else{ this._menssagewin(quien.id)}
-                      }else{ this._menssagewin(quien.id)}
-                    }else{ this._menssagewin(quien.id)}
-                  }else{ this._menssagewin(quien.id)}
-                }else{ this._menssagewin(quien.id)}
-              }else{ this._menssagewin(quien.id)}
-            }else{ this._menssagewin(quien.id)}
-          }else{ this._menssagewin(quien.id)}
-        }else{ this._menssagewin(quien.id)}
+                        } else {
+                          this._menssagewin(quien.id)
+                        }
+                      } else {
+                        this._menssagewin(quien.id)
+                      }
+                    } else {
+                      this._menssagewin(quien.id)
+                    }
+                  } else {
+                    this._menssagewin(quien.id)
+                  }
+                } else {
+                  this._menssagewin(quien.id)
+                }
+              } else {
+                this._menssagewin(quien.id)
+              }
+            } else {
+              this._menssagewin(quien.id)
+            }
+          } else {
+            this._menssagewin(quien.id)
+          }
+        } else {
+          this._menssagewin(quien.id)
+        }
         this.gano = "no"
         break
     }
@@ -243,19 +261,19 @@ class LoteriaController {
     game.cards().createMany(rdmCards)
   }
 
-  async _winner4(c1, c2, c3, c4){
+  async _winner4(c1, c2, c3, c4) {
     if (c1 == 1 && c2 == 1 && c3 == 1 && c4 == 1) {
       this.gano = "si"
     }
   }
 
-  async _menssagewin(id){
+  async _menssagewin(id) {
     if (this.gano == "si") {
       this.socket.broadcastToAll('onWin', {
         user_id: id,
         win: "yes"
       })
-    }else{
+    } else {
       this.socket.broadcastToAll('onWin', {
         user_id: id,
         win: "no"
