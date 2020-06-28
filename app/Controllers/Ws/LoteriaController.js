@@ -65,8 +65,9 @@ class LoteriaController {
 
   }
 
-  async onWin() {
-
+  async onWin(quien,como) {
+    let user = await User.find(quien)
+    this.socket.broadcastToAll("message", como)
   }
 
   async onClose(id) {

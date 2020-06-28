@@ -18,5 +18,4 @@ Route.group(() => {
   Route.post('login', 'AuthController.login')
   Route.post('signup', 'AuthController.signup')
   Route.get('logout', 'AuthController.logout').middleware('auth')
-  // Route.get('pifi', 'AuthController.pifi')
 }).prefix('api')
