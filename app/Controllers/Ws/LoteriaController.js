@@ -1,5 +1,5 @@
 'use strict'
-const BoardCards = use('App/Models/Board')
+const BoardCards = use('App/Models/BoardHasCard')
 const Game = use('App/Models/Game')
 const User = use('App/Models/User')
 
