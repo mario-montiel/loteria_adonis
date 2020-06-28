@@ -1,5 +1,6 @@
 'use strict'
 const BoardCards = use('App/Models/BoardHasCard')
+const Card = use('App/Models/Card')
 const Game = use('App/Models/Game')
 const User = use('App/Models/User')
 const Board = use('App/Models/Board')
@@ -49,7 +50,7 @@ class LoteriaController {
               activeUsers = await User.query().where('status', 'active').fetch()
 
               this.socket.broadcastToAll('gameStatus', 'START') // START status is an advice
-
+              this._startGame(game)
               // GENERATING GAME NECESSARY DATA
             }
           }
@@ -94,23 +95,20 @@ class LoteriaController {
     let borcards = await board.boardhascard().fetch()
     switch (quien.como) {
       case 'centro':
-        let gano = true
-        for (var i = 0; i < borcards.length; i++) {
-          switch (borcards[i]) {
-            case 5:
-              if (borcards[i].selected == 1) {
-                this.socket.broadcastToAll("message", borcards)
-              }
-              break
-            case 6:
-              break
-            case 9:
-              break
-            case 10:
-              break
-          }
+        let gano = "nada"
+        let c1 = borcards.rows[5].selected
+        let c2 = borcards.rows[6].selected
+        let c3 = borcards.rows[9].selected
+        let c4 = borcards.rows[10].selected
+        if (c1 == 1 && c2 == 1 && c3 == 1 && c4 == 1) {
+          this.socket.broadcastToAll('onWin', {
+            "todo bien"
+          })
+        } else {
+          this.socket.broadcastToAll("message", "no sea mentiroso we")
         }
         break
+      case 'loteria':
     }
   }
 
@@ -140,21 +138,12 @@ class LoteriaController {
 
     timer = setTimeout(timerBroadcast, 30000);
   }
-  async onShuffle() {
-    const card = await Card.all()
-    const shuffleCards = shuffle(card.rows)
-    const extractCards = shuffleCards.pop()
-    return extractCards;
-  }
-  async onBoard(user_id) {
-    console.log(user_id);
-    let user = await Board.find(user_id)
-    console.log(user)
-    let board = await Board.findBy('user_id', user.user_id)
-    console.log(board);
-    let newBoard = new Board()
-    newBoard.user_id = board.user_id;
-    await newBoard.save();
+
+  async _startGame(game) {
+    const cards = await Card.all()
+    const rdmCards = shuffle(cards)
+
+    game.cards().createMany(rdmCards)
   }
 }
 
