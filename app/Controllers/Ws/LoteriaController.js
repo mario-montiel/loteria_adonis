@@ -4,11 +4,19 @@ const Card = use('App/Models/Card')
 const Game = use('App/Models/Game')
 const User = use('App/Models/User')
 const Board = use('App/Models/Board')
+const Shuffle = require('shuffle-array')
 
-const currentCard = { id: 0, name: 'unknown', path: 'unknown' }
+const currentCard = {
+  id: 0,
+  name: 'unknown',
+  path: 'unknown'
+}
 
 class LoteriaController {
-  constructor({ socket, request }) {
+  constructor({
+    socket,
+    request
+  }) {
     this.socket = socket
     this.request = request
     this.gano = "no"
@@ -49,10 +57,26 @@ class LoteriaController {
               this.socket.broadcastToAll('gameStatus', 'START') // START status is an advice
               //SI FUNCIONA COMPROBADO (ESPERO :'V)
               const idActiveUser = activeUsers.rows[0].id
-              console.log(idActiveUser);
+              //console.log(idActiveUser);
               const newBoard = new Board();
               newBoard.user_id = idActiveUser;
               await newBoard.save();
+
+              //CREATE BOARD WITH CARDS
+              const idBoard = await Board.last(); //la última carta
+              const aux = await idBoard.id
+
+              for (let i = 0; i <= 15; i++) {
+                const card = await Card.all()
+                const shuffleCards = Shuffle(card.rows)
+                const extractCard = shuffleCards.pop()
+
+                const boardHasCards = new BoardCards();
+                boardHasCards.board_id = aux;
+                boardHasCards.card_id = await extractCard.id
+                boardHasCards.position = i;
+                boardHasCards.save();
+              }
 
               this._startGame(game)
               // GENERATING GAME NECESSARY DATA
