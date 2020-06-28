@@ -73,7 +73,8 @@ class LoteriaController {
     if (board && correctCard) {
       success = true
 
-      //board.
+      board.selected = 1
+      board.save()
     }
 
     this.socket.broadcastToAll('cardSelect', {
