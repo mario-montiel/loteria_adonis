@@ -1,5 +1,6 @@
 'use strict'
 const BoardCards = use('App/Models/BoardHasCard')
+const Card = use('App/Models/Card')
 const Game = use('App/Models/Game')
 const User = use('App/Models/User')
 const Board = use('App/Models/Board')
@@ -44,7 +45,7 @@ class LoteriaController {
               activeUsers = await User.query().where('status', 'active').fetch()
 
               this.socket.broadcastToAll('gameStatus', 'START') // START status is an advice
-
+              this._startGame(game)
               // GENERATING GAME NECESSARY DATA
             }
           }
@@ -124,6 +125,13 @@ class LoteriaController {
     }
 
     timer = setTimeout(timerBroadcast, 30000);
+  }
+
+  async _startGame(game) {
+    const cards = await Card.all()
+    const rdmCards = shuffle(cards)
+
+    game.cards().createMany(rdmCards)
   }
 }
 
