@@ -10,10 +10,7 @@ const shuffle = require('shuffle-array')
 const currentCard = { id: 0, name: 'unknown', path: 'unknown' }
 
 class LoteriaController {
-  constructor({
-    socket,
-    request
-  }) {
+  constructor({ socket, request }) {
     this.socket = socket
     this.request = request
     this.gano = "no"
@@ -21,9 +18,7 @@ class LoteriaController {
 
   async onJoin(id) {
     let user = await User.find(id)
-    if (!user) {
-      return
-    }
+    if (!user) { return }
 
     user.status = 'active'
     await user.save()
@@ -32,66 +27,69 @@ class LoteriaController {
     this.socket.broadcast('connUser', user)
 
     let game = await Game.first()
-    if (game) {
-      let activeUsers = await User.query().where('status', 'active').getCount()
-      switch (game.status) {
-        // in case the game is waiting for users
-        case 'inactive':
-          if (activeUsers > 1) {
-            game.status = 'preparing'
-            game.save()
 
-            this._runTimer(game.id)
+    if (!game) {
+      game = await new Game()
+      game.status = 'inactive'
+      await game.save()
+    }
 
-            // The game status could change if users disconnect letting one conncected
-            game = game.find(game.id)
-            if (game.status == 'preparing') {
-              game.status = 'playing'
-              await game.status()
+    let activeUsers = await User.query().where('status', 'active').getCount()
 
-              activeUsers = await User.query().where('status', 'active').fetch()
+    if (activeUsers > 1) {
+      status = game.status
 
-              this.socket.broadcastToAll('gameStatus', 'START') // START status is an advice
-              //SI FUNCIONA COMPROBADO (ESPERO :'V)
-              const idActiveUser = activeUsers.rows[0].id
-              //console.log(idActiveUser);
-              const newBoard = new Board();
-              newBoard.user_id = idActiveUser;
-              await newBoard.save();
+      if (status == 'inactive') {
+        game.status = 'preparing'
+        await game.save()
 
-              //CREATE BOARD WITH CARDS
-              const idBoard = await Board.last(); //la última carta
-              const aux = await idBoard.id
+        this._runTimer(game.id)
 
-              for (let i = 0; i <= 15; i++) {
-                const card = await Card.all()
-                const shuffleCards = shuffle(card.rows)
-                const extractCard = shuffleCards.pop()
+        // The game status could change if users disconnect letting one conncected
+        game = await game.find(game.id)
+        if (game.status == 'preparing') {
+          game.status = 'playing'
+          await game.save()
 
-                const boardHasCards = new BoardCards();
-                boardHasCards.board_id = aux;
-                boardHasCards.card_id = await extractCard.id
-                boardHasCards.position = i;
-                boardHasCards.save();
-              }
+          activeUsers = await User.query().where('status', 'active').fetch()
 
-              this._startGame(game)
-              // GENERATING GAME NECESSARY DATA
-            }
+          this.socket.broadcastToAll('gameStatus', 'START') // START status is an advice
+
+          // Data generation
+          const idActiveUser = activeUsers.rows[0].id
+          const newBoard = new Board();
+          newBoard.user_id = idActiveUser;
+          await newBoard.save();
+
+          //CREATE BOARD WITH CARDS
+          const idBoard = await Board.last(); //la última carta
+          const aux = await idBoard.id
+
+          for (let i = 0; i <= 15; i++) {
+            const card = await Card.all()
+            const shuffleCards = shuffle(card.rows)
+            const extractCard = shuffleCards.pop()
+
+            const boardHasCards = new BoardCards();
+            boardHasCards.board_id = aux;
+            boardHasCards.card_id = await extractCard.id
+            boardHasCards.position = i;
+            boardHasCards.save();
           }
-          break
-          // the game has already started
-        case 'playing':
-          this.socket.broadcast('gameStatus', 'playing')
-          break
-          // the game is waiting for users before it can start
-        case 'preparing':
-          // I don't know what to do here :c It's Mario's fault
-          break
+
+          this._startGame(game)
+          // GENERATING GAME NECESSARY DATA
+        }
       }
-    } else {
-      game = new Game()
-      game.status = 'preparing'
+
+      if (status == 'playing') {
+        this.socket.broadcastToAll('gameStatus', 'playing')
+        return
+      }
+
+      if (game.status == 'preparing') {
+        this.socket.broadcastToAll('gameStatus', 'preparing')
+      }
     }
   }
 
@@ -270,7 +268,7 @@ class LoteriaController {
       this.socket.broadcastToAll('timer', sec)
     }
 
-    timer = setTimeout(timerBroadcast, 30000);
+    timer = setTimeout(timerBroadcast, 30000)
   }
 
   async _startGame(game) {
@@ -302,7 +300,7 @@ class LoteriaController {
     }
   }
 
-  async _winner4(c1, c2, c3, c4){
+  async _winner4(c1, c2, c3, c4) {
     if (c1 == 1 && c2 == 1 && c3 == 1 && c4 == 1) {
       this.gano = "si"
     }
