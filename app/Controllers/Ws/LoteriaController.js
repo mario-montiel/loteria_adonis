@@ -114,6 +114,25 @@ class LoteriaController {
         this._menssagewin(quien.id)
         this.gano = "no"
         break
+      case 'full':
+        this.gano = "si"
+        for (var i = 0; i < borcards.rows.length; i++) {
+          if (borcards.rows[i].selected == 0) {
+            this.gano = "no"
+          }
+        }
+        if (this.gano == "si") {
+          this.socket.broadcastToAll('onWin', {
+            user_id: quien.id,
+            win: "yes"
+          })
+        }else{
+          this.socket.broadcastToAll('onWin', {
+            user_id: quien.id,
+            win: "no"
+          })
+        }
+        break
       case 'loteria':
         c1 = borcards.rows[0].selected
         c2 = borcards.rows[1].selected
