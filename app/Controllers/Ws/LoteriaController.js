@@ -2,6 +2,7 @@
 const BoardCards = use('App/Models/BoardHasCard')
 const Game = use('App/Models/Game')
 const User = use('App/Models/User')
+const Board = use('App/Models/Board')
 
 const currentCardId = 0
 
@@ -83,7 +84,25 @@ class LoteriaController {
     })
   }
 
-  async onWin() {
+  async onWin(quien) {
+    let user = await User.find(quien.id)
+    let board = await Board.findBy('user_id', user.id)
+    let borcards = await board.boardhascard().fetch()
+    switch(quien.como){
+      case 'centro':
+      let gano = true
+        for (var i = 0; i < borcards.length; i++) {
+          switch(borcards[i]){
+            case 5: if(borcards[i].selected == 1){
+              this.socket.broadcastToAll("message", borcards)
+              } break
+            case 6: break
+            case 9: break
+            case 10: break
+          }
+        }
+        break
+    }
   }
 
   async onClose(id) {
