@@ -8,10 +8,7 @@ const Board = use('App/Models/Board')
 const currentCardId = 0
 
 class LoteriaController {
-  constructor({
-    socket,
-    request
-  }) {
+  constructor({ socket, request }) {
     this.socket = socket
     this.request = request
     this.gano = "no"
@@ -239,8 +236,9 @@ class LoteriaController {
 
   async _startGame(game) {
     const cards = await Card.all()
-    const rdmCards = shuffle(cards)
-    game.cards().createMany(rdmCards)
+    const rdmCards = await shuffle(cards.rows)
+
+    await game.cards().saveMany(rdmCards)
   }
 
   async _winner4(c1, c2, c3, c4){
