@@ -90,7 +90,17 @@ class LoteriaController {
     let borcards = await board.boardhascard().fetch()
     switch(quien.como){
       case 'centro':
-        this.socket.broadcastToAll("message", borcards)
+      let gano = true
+        for (var i = 0; i < borcards.length; i++) {
+          switch(borcards[i]){
+            case 5: if(borcards[i].selected == 1){
+              this.socket.broadcastToAll("message", borcards)
+              } break
+            case 6: break
+            case 9: break
+            case 10: break
+          }
+        }
         break
     }
   }
