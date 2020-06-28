@@ -2,7 +2,7 @@
 const BoardCards = use('App/Models/BoardHasCard')
 const Game = use('App/Models/Game')
 const User = use('App/Models/User')
-const BoardHasCard = use('App/Models/BoardHasCard')
+const Board = use('App/Models/Board')
 
 const currentCardId = 0
 
@@ -86,8 +86,8 @@ class LoteriaController {
 
   async onWin(quien) {
     let user = await User.find(quien.id)
-    let board = await BoardCards.findBy('user_id', user.id)
-    let borcards = await BoardHasCard.where('board_id', board.id)
+    let board = await Board.findBy('user_id', user.id)
+    let borcards = await board.boardhascard().fetch()
     switch(quien.como){
       case 'centro':
         this.socket.broadcastToAll("message", borcards)
