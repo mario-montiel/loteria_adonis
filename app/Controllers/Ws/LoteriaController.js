@@ -100,7 +100,6 @@ class LoteriaController {
     let user = await User.find(quien.id)
     let board = await Board.findBy('user_id', user.id)
     let borcards = await board.boardhascard().fetch()
-<<<<<<< HEAD
     let c1 = 1
     let c2 = 1
     let c3 = 1
@@ -114,25 +113,6 @@ class LoteriaController {
         this._winner4(c1, c2, c3, c4)
         this._menssagewin(quien.id)
         this.gano = "no"
-=======
-    switch (quien.como) {
-      case 'centro':
-        let c1 = borcards.rows[5].selected
-        let c2 = borcards.rows[6].selected
-        let c3 = borcards.rows[9].selected
-        let c4 = borcards.rows[10].selected
-        if (c1 == 1 && c2 == 1 && c3 == 1 && c4 == 1) {
-          this.socket.broadcastToAll('onWin', {
-            user_id: quien.id,
-            win: "yes"
-          })
-        } else {
-          this.socket.broadcastToAll('onWin', {
-            user_id: quien.id,
-            win: "no"
-          })
-        }
->>>>>>> 40c123a3753bf33ff74e5a2c0ed544d67190b0c5
         break
       case 'loteria':
         c1 = borcards.rows[0].selected
@@ -249,7 +229,7 @@ class LoteriaController {
       this.gano = "si"
     }
   }
-  
+
   async _menssagewin(id){
     if (this.gano == "si") {
       this.socket.broadcastToAll('onWin', {
