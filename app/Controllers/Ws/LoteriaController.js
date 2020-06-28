@@ -5,7 +5,7 @@ const Game = use('App/Models/Game')
 const User = use('App/Models/User')
 const Board = use('App/Models/Board')
 
-const currentCardId = 0
+const currentCard = { id: 0, name: 'unknown', path: 'unknown' }
 
 class LoteriaController {
   constructor({ socket, request }) {
@@ -75,7 +75,7 @@ class LoteriaController {
   }
 
   async onCardSelect(data) {
-    let correctCard = data.card_id == currentCardId ? true : false
+    let correctCard = data.card_id == currentCard.id ? true : false
     let board = await BoardCards.query().where('board_id', data.board_id)
       .andWhere('card_id'.data.card_id).first().fetch()
     let success = false
