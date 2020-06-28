@@ -6,11 +6,17 @@ const User = use('App/Models/User')
 const Board = use('App/Models/Board')
 const Shuffle = require('shuffle-array')
 
+<<<<<<< HEAD
 const currentCard = {
   id: 0,
   name: 'unknown',
   path: 'unknown'
 }
+=======
+const shuffle = require('shuffle-array')
+
+const currentCard = { id: 0, name: 'unknown', path: 'unknown' }
+>>>>>>> 93c21d6985c742e4be7b09f5cbb6616fc5e61df4
 
 class LoteriaController {
   constructor({
@@ -283,7 +289,29 @@ class LoteriaController {
     await game.cards().saveMany(rdmCards)
   }
 
-  async _winner4(c1, c2, c3, c4) {
+  // Aquí cambia el ciclo de las cartas de en medio :u
+  async _currCardCycle(game) {
+    let interval = setInterval(cardCycle, 3000);
+
+    function cardCycle() {
+      let cards = game.cards().fetch()
+
+      if (!cards) {
+        this.socket.broadcastToAll('onWin', {
+          user_id: 0,
+          win: "draw"
+        })
+        clearInterval(interval)
+      }
+
+      this.currentCard = cards.first()
+      game.cards().detach(this.currentCard.id)
+
+      this.socket.broadcastToAll('card', this.currentCard)
+    }
+  }
+
+  async _winner4(c1, c2, c3, c4){
     if (c1 == 1 && c2 == 1 && c3 == 1 && c4 == 1) {
       this.gano = "si"
     }
