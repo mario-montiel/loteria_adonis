@@ -1,6 +1,10 @@
 'use strict'
-const User = use('App/Models/User')
+const BoardCards = use('App/Models/Board')
 const Game = use('App/Models/Game')
+const User = use('App/Models/User')
+const BoardHasCard = use('App/Models/BoardHasCard')
+
+const currentCardId = 0
 
 class LoteriaController {
   constructor({ socket, request }) {
@@ -61,13 +65,27 @@ class LoteriaController {
     }
   }
 
-  async onCardSelect() {
+  async onCardSelect(data) {
+    let board = BoardCards.query() .where('board_id', data.board_id)
+    .andWhere('card_id'. data.card_id) .first() .fetch()
 
+    if (!board) { return }
+
+    let correctCard = false
+    if (data.card_id = currentCardId) { correctCard = true }
+
+    this.socket.broadcastToAll('cardSelect', { user_id: data.user_id, success: success })
   }
 
-  async onWin(quien,como) {
-    let user = await User.find(quien)
-    this.socket.broadcastToAll("message", como)
+  async onWin(quien) {
+    let user = await User.find(quien.id)
+    let board = await BoardCards.findBy('user_id', user.id)
+    let borcards = await BoardHasCard.where('board_id', board.id)
+    switch(quien.como){
+      case 'centro':
+        this.socket.broadcastToAll("message", borcards)
+        break
+    }
   }
 
   async onClose(id) {
