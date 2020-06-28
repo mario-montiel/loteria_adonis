@@ -4,19 +4,10 @@ const Card = use('App/Models/Card')
 const Game = use('App/Models/Game')
 const User = use('App/Models/User')
 const Board = use('App/Models/Board')
-const Shuffle = require('shuffle-array')
 
-<<<<<<< HEAD
-const currentCard = {
-  id: 0,
-  name: 'unknown',
-  path: 'unknown'
-}
-=======
 const shuffle = require('shuffle-array')
 
 const currentCard = { id: 0, name: 'unknown', path: 'unknown' }
->>>>>>> 93c21d6985c742e4be7b09f5cbb6616fc5e61df4
 
 class LoteriaController {
   constructor({
@@ -74,7 +65,7 @@ class LoteriaController {
 
               for (let i = 0; i <= 15; i++) {
                 const card = await Card.all()
-                const shuffleCards = Shuffle(card.rows)
+                const shuffleCards = shuffle(card.rows)
                 const extractCard = shuffleCards.pop()
 
                 const boardHasCards = new BoardCards();
