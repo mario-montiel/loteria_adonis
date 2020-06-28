@@ -7,6 +7,7 @@ class BoardSchema extends Schema {
   up () {
     this.create('boards', (table) => {
       table.increments()
+      table.integer('user_id').unsigned().references('id').inTable('users')
     })
   }
 
