@@ -5,13 +5,10 @@ const Game = use('App/Models/Game')
 const User = use('App/Models/User')
 const Board = use('App/Models/Board')
 
-const currentCardId = 0
+const currentCard = { id: 0, name: 'unknown', path: 'unknown' }
 
 class LoteriaController {
-  constructor({
-    socket,
-    request
-  }) {
+  constructor({ socket, request }) {
     this.socket = socket
     this.request = request
     this.gano = "no"
@@ -78,7 +75,7 @@ class LoteriaController {
   }
 
   async onCardSelect(data) {
-    let correctCard = data.card_id == currentCardId ? true : false
+    let correctCard = data.card_id == currentCard.id ? true : false
     let board = await BoardCards.query().where('board_id', data.board_id)
       .andWhere('card_id'.data.card_id).first().fetch()
     let success = false
@@ -257,8 +254,9 @@ class LoteriaController {
 
   async _startGame(game) {
     const cards = await Card.all()
-    const rdmCards = shuffle(cards)
-    game.cards().createMany(rdmCards)
+    const rdmCards = await shuffle(cards.rows)
+
+    await game.cards().saveMany(rdmCards)
   }
 
   async _winner4(c1, c2, c3, c4) {
