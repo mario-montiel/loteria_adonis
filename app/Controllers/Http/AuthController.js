@@ -20,8 +20,8 @@ class AuthController {
   }
 
   /*async pifi({request,auth}){
-    let popo = await Game.find('1')
-    let juegycartas = await popo.cards().fetch()
+    let popo = await Game.find('2')
+    let juegycartas = await popo.users().fetch()
     return juegycartas
   }*/
 
