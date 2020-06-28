@@ -142,7 +142,6 @@ class LoteriaController {
   async _startGame(game) {
     const cards = await Card.all()
     const rdmCards = shuffle(cards)
-
     game.cards().createMany(rdmCards)
   }
 }
