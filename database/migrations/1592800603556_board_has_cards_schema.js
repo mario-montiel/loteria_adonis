@@ -9,8 +9,8 @@ class BoardHasCardsSchema extends Schema {
       table.increments()
       table.integer('board_id').unsigned().references('id').inTable('boards')
       table.integer('card_id').unsigned().references('id').inTable('cards')
-      table.string('selected')
-      table.string('position')
+      table.boolean('selected').defaultTo(0)
+      table.integer('position')
     })
   }
 
