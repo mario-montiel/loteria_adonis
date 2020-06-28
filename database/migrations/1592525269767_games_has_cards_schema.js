@@ -7,8 +7,8 @@ class GamesHasCardsSchema extends Schema {
   up () {
     this.create('games_has_cards', (table) => {
     	table.increments()
-    	table.integer('games_id').unsigned().references('id').inTable('games')
-    	table.integer('cards_id').unsigned().references('id').inTable('cards')
+    	table.integer('game_id').unsigned().references('id').inTable('games')
+    	table.integer('card_id').unsigned().references('id').inTable('cards')
     })
   }
 

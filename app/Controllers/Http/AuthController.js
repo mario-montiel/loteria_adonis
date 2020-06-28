@@ -1,5 +1,6 @@
 'use strict'
 const User = use('App/Models/User')
+const Game = use('App/Models/Game')
 
 class AuthController {
   async login({ request, auth }) {
@@ -17,6 +18,12 @@ class AuthController {
     Object.assign(user, token)
     return user
   }
+
+  /*async pifi({request,auth}){
+    let popo = await Game.find('1')
+    let juegycartas = await popo.cards().fetch()
+    return juegycartas
+  }*/
 
   async signup({ request, auth }) {
     const data = request.only(['username', 'email', 'password'])

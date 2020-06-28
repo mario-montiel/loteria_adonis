@@ -4,6 +4,11 @@
 const Model = use('Model')
 
 class Game extends Model {
+	cards(){
+		return this
+		.belongsToMany('App/Models/Card')
+		.pivotTable('games_has_cards')
+	}
 	static get createdAtColumn () {
 		return null
 	}
