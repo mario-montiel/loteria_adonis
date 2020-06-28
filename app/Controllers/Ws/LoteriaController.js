@@ -127,7 +127,7 @@ class LoteriaController {
         c3 = borcards.rows[9].selected
         c4 = borcards.rows[10].selected
         this._winner4(c1, c2, c3, c4)
-        this._menssagewin(quien.id)
+        this._messagewin(quien.id)
         this.gano = "no"
         break
       case 'full':
@@ -210,34 +210,34 @@ class LoteriaController {
                           c4 = borcards.rows[12].selected
                           this._winner4(c1, c2, c3, c4)
                           if (this.gano == "no") {
-                            this._menssagewin(quien.id)
+                            this._messagewin(quien.id)
                           }
                         } else {
-                          this._menssagewin(quien.id)
+                          this._messagewin(quien.id)
                         }
                       } else {
-                        this._menssagewin(quien.id)
+                        this._messagewin(quien.id)
                       }
                     } else {
-                      this._menssagewin(quien.id)
+                      this._messagewin(quien.id)
                     }
                   } else {
-                    this._menssagewin(quien.id)
+                    this._messagewin(quien.id)
                   }
                 } else {
-                  this._menssagewin(quien.id)
+                  this._messagewin(quien.id)
                 }
               } else {
-                this._menssagewin(quien.id)
+                this._messagewin(quien.id)
               }
             } else {
-              this._menssagewin(quien.id)
+              this._messagewin(quien.id)
             }
           } else {
-            this._menssagewin(quien.id)
+            this._messagewin(quien.id)
           }
         } else {
-          this._menssagewin(quien.id)
+          this._messagewin(quien.id)
         }
         this.gano = "no"
         break
@@ -306,7 +306,7 @@ class LoteriaController {
     }
   }
 
-  async _menssagewin(id) {
+  async _messagewin(id) {
     if (this.gano == "si") {
       this.socket.broadcastToAll('onWin', {
         user_id: id,
