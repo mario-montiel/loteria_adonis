@@ -135,6 +135,7 @@ class LoteriaController {
             user_id: quien.id,
             win: "yes"
           })
+          this._finishGame()
         } else {
           this.socket.broadcastToAll('onWin', {
             user_id: quien.id,
@@ -314,6 +315,7 @@ class LoteriaController {
         user_id: id,
         win: "yes"
       })
+      this._finishGame()
     } else {
       this.socket.broadcastToAll('onWin', {
         user_id: id,
