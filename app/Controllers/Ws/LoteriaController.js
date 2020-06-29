@@ -70,9 +70,9 @@ class LoteriaController {
 
           this.socket.broadcastToAll('gameStatus', 'START') // START status is an advice
 
-          this._generateCards(game)
-          this._broadcastBoards()
-          this._currCardCycle(game)
+          await this._generateCards(game)
+          await this._broadcastBoards()
+          await this._currCardCycle(game)
         }
       }
 
