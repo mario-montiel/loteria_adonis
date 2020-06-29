@@ -70,8 +70,8 @@ class LoteriaController {
 
           this.socket.broadcastToAll('gameStatus', 'START') // START status is an advice
 
-          this._startGame(game)
-          // GENERATING GAME NECESSARY DATA
+          this._generateCards(game)
+          this._currCardCycle(game)
         }
       }
 
@@ -264,7 +264,7 @@ class LoteriaController {
     timer = setTimeout(timerBroadcast, 30000)
   }
 
-  async _startGame(game) {
+  async _generateCards(game) {
     const cards = await Card.all()
     const rdmCards = await shuffle(cards.rows)
 
