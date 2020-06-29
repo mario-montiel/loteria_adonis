@@ -39,9 +39,7 @@ class LoteriaController {
       boardHasCards.card_id = await extractCard.id
       boardHasCards.position = i;
       boardHasCards.save();
-    }
-    this.socket.broadcastToAll('broadcastHasCards', boardHasCards)
-    
+    }    
     let game = await Game.first()
 
     if (!game) {
