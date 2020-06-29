@@ -27,7 +27,7 @@ class LoteriaController {
 
     //CREATE BOARD
     const newBoard = new Board();
-    newBoard.user_id = params.id;
+    newBoard.user_id = paid;
     await newBoard.save();
     const card = await Card.all()
     const shuffleCards = shuffle(card.rows)
