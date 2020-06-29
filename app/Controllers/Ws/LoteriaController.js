@@ -7,23 +7,24 @@ const Board = use('App/Models/Board')
 
 const shuffle = require('shuffle-array')
 
-const currentCard = { id: 0, name: 'unknown', path: 'unknown' }
-
 class LoteriaController {
   constructor({ socket, request }) {
     this.socket = socket
     this.request = request
     this.gano = "no"
+    this.currentCard = { id: 0, name: 'unknown', path: 'unknown' }
   }
 
   async onJoin(id) {
     let user = await User.find(id)
-    if (!user) {
-      return
-    }
+    if (!user) { return }
 
     user.status = 'active'
     await user.save()
+
+    // BROADCAST connected user
+    this.socket.broadcast('connUser', user)
+
     //CREATE BOARD
     const newBoard = new Board();
     newBoard.user_id = params.id;
@@ -33,15 +34,12 @@ class LoteriaController {
 
     for (let i = 0; i <= 15; i++) {
       const extractCard = shuffleCards.pop()
-      const boardHasCards = new BoardHasCard();
+      const boardHasCards = new BoardCards();
       boardHasCards.board_id = newBoard.id;
       boardHasCards.card_id = await extractCard.id
       boardHasCards.position = i;
       boardHasCards.save();
     }
-
-    // BROADCAST connected user
-    this.socket.broadcast('connUser', user)
 
     let game = await Game.first()
 
@@ -273,6 +271,11 @@ class LoteriaController {
     await game.cards().saveMany(rdmCards)
   }
 
+  async onTest() {
+    let game = await Game.first()
+    await game.cards().detach()
+  }
+
   // Aquí cambia el ciclo de las cartas de en medio :u
   async _currCardCycle(game) {
     let interval = setInterval(cardCycle, 3000);
@@ -281,10 +284,14 @@ class LoteriaController {
       let cards = game.cards().fetch()
 
       if (!cards) {
-        this.socket.broadcastToAll('onWin', {
-          user_id: 0,
-          win: "draw"
-        })
+        game = Game.first()
+        if (game.status != 'inactive') {
+          this.socket.broadcastToAll('onWin', {
+            user_id: 0,
+            win: "draw"
+          })
+        }
+
         clearInterval(interval)
       }
 
@@ -313,6 +320,18 @@ class LoteriaController {
         win: "no"
       })
     }
+  }
+
+  async _finishGame() {
+    let game = await Game.first()
+    game.status = 'inactive'
+    await game.save()
+    await game.cards().detach()
+
+    this.currentCard = { id: null, name: 'unknown', path: 'unknown' }
+
+    await BoardCards.truncate()
+    await Board.truncate()
   }
 }
 
