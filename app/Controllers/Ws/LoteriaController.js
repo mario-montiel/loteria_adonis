@@ -27,7 +27,7 @@ class LoteriaController {
 
     //CREATE BOARD
     const newBoard = new Board();
-    newBoard.user_id = paid;
+    newBoard.user_id = id;
     await newBoard.save();
     const card = await Card.all()
     const shuffleCards = shuffle(card.rows)
@@ -39,7 +39,7 @@ class LoteriaController {
       boardHasCards.card_id = await extractCard.id
       boardHasCards.position = i;
       boardHasCards.save();
-    }    
+    }
     let game = await Game.first()
 
     if (!game) {
