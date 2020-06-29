@@ -9,7 +9,7 @@ const Hash = use('Hash')
 class User extends Model {
   board() { return this.hasOne('App/Models/Board') }
 
-  connected() {
+  static connected() {
     return this.query().where('status', 'active')
   }
 
