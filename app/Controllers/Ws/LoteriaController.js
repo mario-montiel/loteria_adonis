@@ -286,6 +286,7 @@ class LoteriaController {
       if (!cards) {
         game = Game.first()
         if (game.status != 'inactive') {
+          this._finishGame()
           this.socket.broadcastToAll('onWin', {
             user_id: 0,
             win: "draw"
