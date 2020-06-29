@@ -2,7 +2,7 @@
 const User = use('App/Models/User')
 
 class UserController {
-  async usersActive({}) {
+  async usersActive() {
     return User.connected().fetch()
   }
 }
