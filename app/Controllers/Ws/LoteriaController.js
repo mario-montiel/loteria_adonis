@@ -84,7 +84,7 @@ class LoteriaController {
       if (game.status == 'preparing') {
         this.socket.broadcastToAll('gameStatus', 'preparing')
       }
-    }
+    } else { this.socket.broadcastToAll('gameStatus', 'inactive') }
   }
 
   async onCardSelect(data) {
@@ -337,6 +337,10 @@ class LoteriaController {
 
     await BoardCards.truncate()
     await Board.truncate()
+  }
+
+  async onTest() {
+    this.broadcastToAll('test', "I'm a broadcast text")
   }
 }
 
