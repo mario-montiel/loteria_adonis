@@ -70,8 +70,9 @@ class LoteriaController {
 
           this.socket.broadcastToAll('gameStatus', 'START') // START status is an advice
 
-          this._generateCards(game)
-          this._currCardCycle(game)
+          await this._generateCards(game)
+          await this._broadcastBoards()
+          await this._currCardCycle(game)
         }
       }
 
@@ -248,6 +249,12 @@ class LoteriaController {
     await user.save()
   }
 
+  async _broadcastBoards(user_id) {
+    let user = await User.find(user_id)
+    let board = await user.board().with('cards').fetch()
+    this.socket.broadcastToAll('boards', board)
+  }
+
   async _runTimer(game_id) {
     let sec = 30,
       timer = 0
@@ -270,11 +277,6 @@ class LoteriaController {
     const rdmCards = await shuffle(cards.rows)
 
     await game.cards().saveMany(rdmCards)
-  }
-
-  async onTest() {
-    let game = await Game.first()
-    await game.cards().detach()
   }
 
   // Aquí cambia el ciclo de las cartas de en medio :u
