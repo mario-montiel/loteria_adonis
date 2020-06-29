@@ -51,7 +51,7 @@ class LoteriaController {
     let activeUsers = await User.query().where('status', 'active').getCount()
 
     if (activeUsers > 1) {
-      status = game.status
+      let status = game.status
 
       if (status == 'inactive') {
         game.status = 'preparing'
@@ -87,9 +87,9 @@ class LoteriaController {
   }
 
   async onCardSelect(data) {
-    let correctCard = data.card_id == currentCard.id ? true : false
+    let correctCard = data.card_id == this.currentCard.id ? true : false
     let board = await BoardCards.query().where('board_id', data.board_id)
-      .andWhere('card_id'.data.card_id).first().fetch()
+      .andWhere('card_id', data.card_id).first()
     let success = false
 
     if (board && correctCard) {
