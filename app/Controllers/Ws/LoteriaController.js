@@ -48,7 +48,7 @@ class LoteriaController {
       await game.save()
     }
 
-    let activeUsers = await User.query().where('status', 'active').getCount()
+    let activeUsers = await User.connected().getCount()
 
     if (activeUsers > 1) {
       let status = game.status
@@ -65,7 +65,7 @@ class LoteriaController {
           game.status = 'playing'
           await game.save()
 
-          activeUsers = await User.query().where('status', 'active').fetch()
+          activeUsers = await User.connected().fetch()
 
           this.socket.broadcastToAll('gameStatus', 'START') // START status is an advice
 
