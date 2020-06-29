@@ -19,12 +19,6 @@ class AuthController {
     return user
   }
 
-  /*async pifi({request,auth}){
-    let popo = await BoardHasCard.find('1')
-    let juegycartas = await popo.cards().fetch()
-    return juegycartas
-  }*/
-
   async signup({ request, auth }) {
     const data = request.only(['username', 'email', 'password'])
 

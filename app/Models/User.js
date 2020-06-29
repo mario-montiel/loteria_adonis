@@ -7,6 +7,8 @@ const Model = use('Model')
 const Hash = use('Hash')
 
 class User extends Model {
+  board() { return this.hasOne('App/Models/Board') }
+
   static boot () {
     super.boot()
 
