@@ -57,10 +57,10 @@ class LoteriaController {
         game.status = 'preparing'
         await game.save()
 
-        this._runTimer(game.id)
+        await this._runTimer(game.id)
 
         // The game status could change if users disconnect letting one conncected
-        game = await game.find(game.id)
+        game = await Game.find(game.id)
         if (game.status == 'preparing') {
           game.status = 'playing'
           await game.save()
@@ -69,9 +69,9 @@ class LoteriaController {
 
           this.socket.broadcastToAll('gameStatus', 'START') // START status is an advice
 
-          await this._generateCards(game)
-          await this._broadcastBoards()
-          await this._currCardCycle(game)
+          //await this._generateCards(game)
+          //await this._broadcastBoards()
+          //await this._currCardCycle(game)
         }
       }
 
@@ -240,35 +240,27 @@ class LoteriaController {
 
   async onClose(id) {
     let user = await User.find(id)
-    if (!user) {
-      return
-    }
+    if (!user) { return }
 
     user.status = 'inactive'
     await user.save()
+
+    this.socket.broadcastToAll('descUser', user)
   }
 
-  async _broadcastBoards(user_id) {
+  /*async _broadcastBoards(user_id) {
     let user = await User.find(user_id)
     let board = await user.board().with('cards').fetch()
     this.socket.broadcastToAll('boards', board)
-  }
+  }*/
 
-  async _runTimer(game_id) {
-    let sec = 30,
-      timer = 0
-
-    function timerBroadcast() {
-      game = Game.find(game_id)
-      if (game.status == 'inactive') {
-        clearTimeout(timer)
-      }
-
-      sec--
-      this.socket.broadcastToAll('timer', sec)
-    }
-
-    timer = setTimeout(timerBroadcast, 30000)
+  _runTimer(game_id) {
+    let secs = 30
+    let interval = setInterval(function(socket) {
+      secs--
+      if (secs == 0) { clearInterval(interval) }
+      socket.broadcastToAll('timer', secs)
+    }, 1000, this.socket)
   }
 
   async _generateCards(game) {
@@ -286,7 +278,7 @@ class LoteriaController {
       let cards = game.cards().fetch()
 
       if (!cards) {
-        game = Game.first()
+        let game = Game.first()
         if (game.status != 'inactive') {
           this._finishGame()
           this.socket.broadcastToAll('onWin', {
@@ -336,10 +328,6 @@ class LoteriaController {
 
     await BoardCards.truncate()
     await Board.truncate()
-  }
-
-  async onTest() {
-    this.broadcastToAll('test', "I'm a broadcast text")
   }
 }
 
