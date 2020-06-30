@@ -278,7 +278,7 @@ class CardSeeder {
       },
       {
         'id': '18',
-        'name': 'El violoncello',
+        'name': 'El violonchello',
         'path': 'img/cards/violonchello.png'
       },
     ]);
