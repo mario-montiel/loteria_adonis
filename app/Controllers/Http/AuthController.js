@@ -1,6 +1,5 @@
 'use strict'
 const User = use('App/Models/User')
-// const BoardHasCard = use('App/Models/BoardHasCard')
 
 class AuthController {
   async login({ request, auth }) {
@@ -15,11 +14,6 @@ class AuthController {
   }
 
   async logout() { await auth.logout() }
-
-  async _user(token, user) {
-    Object.assign(user, token)
-    return user
-  }
 
   async signup({ request, auth }) {
     const data = request.only(['username', 'email', 'password'])
@@ -36,6 +30,11 @@ class AuthController {
     let token = await auth.generate(user)
 
     return this._user(token, user)
+  }
+
+  async _user(token, user) {
+    Object.assign(user, token)
+    return user
   }
 }
 
