@@ -10,7 +10,6 @@ class AuthController {
        let token = await auth.query().withRefreshToken().attempt(email, password)
        //let token = await auth.attempt(email, password)
        return this._user(token, user)
-
   }
 
   async logout() { await auth.logout() }
