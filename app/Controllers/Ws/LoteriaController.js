@@ -26,7 +26,7 @@ class LoteriaController {
     this.socket.broadcast('connUser', user)
 
     //CREATE BOARD
-    /*const newBoard = new Board();
+    const newBoard = new Board();
     newBoard.user_id = id;
     await newBoard.save();
     const card = await Card.all()
@@ -39,7 +39,8 @@ class LoteriaController {
       boardHasCards.card_id = await extractCard.id
       boardHasCards.position = i;
       boardHasCards.save();
-    }*/
+    }
+
     let game = await Game.first()
 
     if (!game) {
@@ -71,16 +72,16 @@ class LoteriaController {
               activeUsers = User.connected().fetch()
 
               socket.broadcastToAll('gameStatus', 'START') // START status is an advice
-
-              //await this._generateCards(game)
-              //await this._broadcastBoards()
-              //await this._currCardCycle(game)
             }
 
             clearInterval(interval)
           }
           socket.broadcastToAll('timer', secs)
         }, 1000, this.socket)
+
+        await this._generateCards(game)
+        await this._broadcastBoards(id)
+        //await this._currCardCycle(game)
       }
 
       if (status == 'playing') {
@@ -256,11 +257,11 @@ class LoteriaController {
     this.socket.broadcastToAll('descUser', user)
   }
 
-  /*async _broadcastBoards(user_id) {
+  async _broadcastBoards(user_id) {
     let user = await User.find(user_id)
     let board = await user.board().with('cards').fetch()
     this.socket.broadcastToAll('boards', board)
-  }*/
+  }
 
   /*_runTimer(game_id) {
     let secs = 30
