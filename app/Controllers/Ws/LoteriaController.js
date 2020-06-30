@@ -1,6 +1,7 @@
 'use strict'
 const BoardCards = use('App/Models/BoardHasCard')
 const Card = use('App/Models/Card')
+const Database = use('Database')
 const Game = use('App/Models/Game')
 const User = use('App/Models/User')
 const Board = use('App/Models/Board')
@@ -101,14 +102,15 @@ class LoteriaController {
               })
             }
 
-            clearInterval(interval2)
+            await clearInterval(interval2)
+            return
           }
 
           currentCard = card
           await game.cards().detach(card.id)
 
           socket.broadcastToAll('card', card)
-        }, 3000, this.socket, this._finishGame);
+        }, 1000, this.socket, this._finishGame);
         //await this._currCardCycle(game)
       }
 
@@ -354,8 +356,9 @@ class LoteriaController {
 
     currentCard = { id: null, name: 'unknown', path: 'unknown' }
 
-    await BoardCards.truncate()
-    await Board.truncate()
+    console.log('I finish the game')
+    await Database.delete('*').from('board_has_cards')
+    await Database.delete('*').from('boards')
   }
 }
 

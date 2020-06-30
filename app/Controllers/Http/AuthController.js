@@ -5,12 +5,11 @@ class AuthController {
   async login({ request, auth }) {
     const { email, password } = request.all()
 
-    if (await auth.attempt(email, password)) {
-      let user = await User.findBy('email', email)
-      let token = await auth.generate(user)
-
-      return this._user(token, user)
-    }
+    // if (await auth.attempt(email, password)) {
+       let user = await User.findBy('email', email)
+       let token = await auth.query().withRefreshToken().attempt(email, password)
+       //let token = await auth.attempt(email, password)
+       return this._user(token, user)
   }
 
   async logout() { await auth.logout() }
