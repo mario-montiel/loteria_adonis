@@ -41,6 +41,8 @@ class LoteriaController {
       boardHasCards.save();
     }
 
+    await this._broadcastBoards(id)
+
     let game = await Game.first()
 
     if (!game) {
@@ -59,7 +61,7 @@ class LoteriaController {
         await game.save()
 
         //await this._runTimer()
-        let secs = 3
+        let secs = 30
         let interval = setInterval(function (socket) {
           secs--
           let activeUsers = User.connected().getCount()
@@ -80,7 +82,6 @@ class LoteriaController {
         }, 1000, this.socket)
 
         await this._generateCards(game)
-        await this._broadcastBoards(id)
         //await this._currCardCycle(game)
       }
 
