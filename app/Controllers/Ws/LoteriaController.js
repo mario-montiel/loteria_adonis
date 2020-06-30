@@ -7,6 +7,8 @@ const Board = use('App/Models/Board')
 
 const shuffle = require('shuffle-array')
 
+var currentCard = { id: 0, name: 'unknown', path: 'unknown' }
+
 class LoteriaController {
   constructor({
     socket,
@@ -15,11 +17,6 @@ class LoteriaController {
     this.socket = socket
     this.request = request
     this.gano = "no"
-    this.currentCard = {
-      id: 0,
-      name: 'unknown',
-      path: 'unknown'
-    }
   }
 
   async onJoin(id) {
@@ -91,8 +88,8 @@ class LoteriaController {
         }, 1000, this.socket)
 
         //await this._runTimer()
-        let secs = 30
-        let interval = setInterval(function (socket) {
+        let secs = 3
+        let interval = setInterval((socket) => {
           secs--
           let activeUsers = User.connected().getCount()
           if (secs == 0 || activeUsers == 10) {
@@ -111,7 +108,33 @@ class LoteriaController {
           socket.broadcastToAll('timer', secs)
         }, 1000, this.socket)
 
-        await this._generateCards(game)
+        //await this._generateCards(game)
+        const cards = await Card.all()
+        const rdmCards = await shuffle(cards.rows)
+        await game.cards().saveMany(rdmCards)
+
+        let interval2 = setInterval(async (socket, _finishGame) => {
+          let game = await Game.first()
+          let card = await game.cards().first()
+
+          if (!card) {
+            let game = await Game.first()
+            if (game.status != 'inactive') {
+              _finishGame()
+              socket.broadcastToAll('onWin', {
+                user_id: 0,
+                win: "draw"
+              })
+            }
+
+            clearInterval(interval2)
+          }
+
+          currentCard = card
+          await game.cards().detach(card.id)
+
+          socket.broadcastToAll('card', card)
+        }, 3000, this.socket, this._finishGame);
         //await this._currCardCycle(game)
       }
 
@@ -129,7 +152,7 @@ class LoteriaController {
   }
 
   async onCardSelect(data) {
-    let correctCard = data.card_id == this.currentCard.id ? true : false
+    let correctCard = data.card_id == currentCard.id ? true : false
     let board = await BoardCards.query().where('board_id', data.board_id)
       .andWhere('card_id', data.card_id).first()
     let success = false
@@ -298,6 +321,7 @@ class LoteriaController {
     this.socket.broadcastToAll('boards', board)
   }
 
+<<<<<<< HEAD
   /*_runTimer(game_id) {
     let secs = 30
     let interval = setInterval(function (socket) {
@@ -309,6 +333,8 @@ class LoteriaController {
     }, 1000, this.socket)
   }*/
 
+=======
+>>>>>>> 0e265811a4a9bc6d7cba65ebf5449bc2678eb7da
   async _generateCards(game) {
     const cards = await Card.all()
     const rdmCards = await shuffle(cards.rows)
@@ -318,16 +344,16 @@ class LoteriaController {
 
   // Aquí cambia el ciclo de las cartas de en medio :u
   async _currCardCycle(game) {
-    let interval = setInterval(cardCycle, 3000);
+    let interval = setInterval(cardCycle, 3000, this.socket, this._finishGame);
 
-    function cardCycle() {
-      let cards = game.cards().fetch()
+    function cardCycle(socket, _finishGame) {
+      let card = game.cards().first()
 
-      if (!cards) {
+      if (!card) {
         let game = Game.first()
         if (game.status != 'inactive') {
-          this._finishGame()
-          this.socket.broadcastToAll('onWin', {
+          _finishGame()
+          socket.broadcastToAll('onWin', {
             user_id: 0,
             win: "draw"
           })
@@ -336,10 +362,10 @@ class LoteriaController {
         clearInterval(interval)
       }
 
-      this.currentCard = cards.first()
-      game.cards().detach(this.currentCard.id)
+      currentCard = card
+      game.cards().detach(currentCard.id)
 
-      this.socket.broadcastToAll('card', this.currentCard)
+      socket.broadcastToAll('card', currentCard)
     }
   }
 
@@ -370,11 +396,15 @@ class LoteriaController {
     await game.save()
     await game.cards().detach()
 
+<<<<<<< HEAD
     this.currentCard = {
       id: null,
       name: 'unknown',
       path: 'unknown'
     }
+=======
+    currentCard = { id: null, name: 'unknown', path: 'unknown' }
+>>>>>>> 0e265811a4a9bc6d7cba65ebf5449bc2678eb7da
 
     await BoardCards.truncate()
     await Board.truncate()
