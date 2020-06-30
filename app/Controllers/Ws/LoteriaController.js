@@ -35,7 +35,7 @@ class LoteriaController {
     this.socket.broadcast('connUser', user)
 
     //CREATE BOARD
-    const newBoard = new Board();
+    /*const newBoard = new Board();
     newBoard.user_id = id;
     await newBoard.save();
     const card = await Card.all()
@@ -48,7 +48,7 @@ class LoteriaController {
       boardHasCards.card_id = await extractCard.id
       boardHasCards.position = i;
       boardHasCards.save();
-    }
+    }*/
     let game = await Game.first()
 
     if (!game) {
@@ -87,10 +87,30 @@ class LoteriaController {
           socket.broadcastToAll('timer', secs)
         }, 1000, this.socket)
 
+        //await this._runTimer()
+        let secs = 3
+        let interval = setInterval(function (socket) {
+          secs--
+          let activeUsers = User.connected().getCount()
+          if (secs == 0 || activeUsers == 10) {
+            // The game status could change if users disconnect letting one conncected
+            if (game.status == 'preparing') {
+              game.status = 'playing'
+              game.save()
 
-        //        await this._runTimer(game.id)
+              activeUsers = User.connected().fetch()
 
-        // The game status could change if users disconnect letting one conncected
+              socket.broadcastToAll('gameStatus', 'START') // START status is an advice
+
+              //await this._generateCards(game)
+              //await this._broadcastBoards()
+              //await this._currCardCycle(game)
+            }
+
+            clearInterval(interval)
+          }
+          socket.broadcastToAll('timer', secs)
+        }, 1000, this.socket)
       }
 
       if (status == 'playing') {
@@ -276,7 +296,7 @@ class LoteriaController {
     this.socket.broadcastToAll('boards', board)
   }*/
 
-  _runTimer(game_id) {
+  /*_runTimer(game_id) {
     let secs = 30
     let interval = setInterval(function (socket) {
       secs--
@@ -285,7 +305,7 @@ class LoteriaController {
       }
       socket.broadcastToAll('timer', secs)
     }, 1000, this.socket)
-  }
+  }*/
 
   async _generateCards(game) {
     const cards = await Card.all()
