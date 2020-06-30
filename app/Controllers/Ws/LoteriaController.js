@@ -321,20 +321,6 @@ class LoteriaController {
     this.socket.broadcastToAll('boards', board)
   }
 
-<<<<<<< HEAD
-  /*_runTimer(game_id) {
-    let secs = 30
-    let interval = setInterval(function (socket) {
-      secs--
-      if (secs == 0) {
-        clearInterval(interval)
-      }
-      socket.broadcastToAll('timer', secs)
-    }, 1000, this.socket)
-  }*/
-
-=======
->>>>>>> 0e265811a4a9bc6d7cba65ebf5449bc2678eb7da
   async _generateCards(game) {
     const cards = await Card.all()
     const rdmCards = await shuffle(cards.rows)
@@ -396,15 +382,7 @@ class LoteriaController {
     await game.save()
     await game.cards().detach()
 
-<<<<<<< HEAD
-    this.currentCard = {
-      id: null,
-      name: 'unknown',
-      path: 'unknown'
-    }
-=======
     currentCard = { id: null, name: 'unknown', path: 'unknown' }
->>>>>>> 0e265811a4a9bc6d7cba65ebf5449bc2678eb7da
 
     await BoardCards.truncate()
     await Board.truncate()
