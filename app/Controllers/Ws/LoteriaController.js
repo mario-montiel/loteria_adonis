@@ -1,6 +1,7 @@
 'use strict'
 const BoardCards = use('App/Models/BoardHasCard')
 const Card = use('App/Models/Card')
+const Database = use('Database')
 const Game = use('App/Models/Game')
 const User = use('App/Models/User')
 const Board = use('App/Models/Board')
@@ -10,10 +11,7 @@ const shuffle = require('shuffle-array')
 var currentCard = { id: 0, name: 'unknown', path: 'unknown' }
 
 class LoteriaController {
-  constructor({
-    socket,
-    request
-  }) {
+  constructor({ socket, request }) {
     this.socket = socket
     this.request = request
     this.gano = "no"
@@ -21,9 +19,7 @@ class LoteriaController {
 
   async onJoin(id) {
     let user = await User.find(id)
-    if (!user) {
-      return
-    }
+    if (!user) { return }
 
     user.status = 'active'
     await user.save()
@@ -65,27 +61,6 @@ class LoteriaController {
       if (status == 'inactive') {
         game.status = 'preparing'
         await game.save()
-        let secs = 30
-        let interval = setInterval(function (socket) {
-          secs--
-          if (secs == 0) {
-            clearInterval(interval)
-            game =  Game.find(game.id)
-            if (game.status == 'preparing') {
-              game.status = 'playing'
-              await game.save()
-
-              activeUsers = await User.connected().fetch()
-
-              this.socket.broadcastToAll('gameStatus', 'START') // START status is an advice
-
-              //await this._generateCards(game)
-              //await this._broadcastBoards()
-              //await this._currCardCycle(game)
-            }
-          }
-          socket.broadcastToAll('timer', secs)
-        }, 1000, this.socket)
 
         //await this._runTimer()
         let secs = 3
@@ -127,14 +102,15 @@ class LoteriaController {
               })
             }
 
-            clearInterval(interval2)
+            await clearInterval(interval2)
+            return
           }
 
           currentCard = card
           await game.cards().detach(card.id)
 
           socket.broadcastToAll('card', card)
-        }, 3000, this.socket, this._finishGame);
+        }, 1000, this.socket, this._finishGame);
         //await this._currCardCycle(game)
       }
 
@@ -146,9 +122,7 @@ class LoteriaController {
       if (game.status == 'preparing') {
         this.socket.broadcastToAll('gameStatus', 'preparing')
       }
-    } else {
-      this.socket.broadcastToAll('gameStatus', 'inactive')
-    }
+    } else { this.socket.broadcastToAll('gameStatus', 'inactive') }
   }
 
   async onCardSelect(data) {
@@ -305,9 +279,7 @@ class LoteriaController {
 
   async onClose(id) {
     let user = await User.find(id)
-    if (!user) {
-      return
-    }
+    if (!user) { return }
 
     user.status = 'inactive'
     await user.save()
@@ -384,8 +356,9 @@ class LoteriaController {
 
     currentCard = { id: null, name: 'unknown', path: 'unknown' }
 
-    await BoardCards.truncate()
-    await Board.truncate()
+    console.log('I finish the game')
+    await Database.delete('*').from('board_has_cards')
+    await Database.delete('*').from('boards')
   }
 }
 
