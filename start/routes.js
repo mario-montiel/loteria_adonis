@@ -18,7 +18,7 @@ Route.get('', () => {
 
 Route.group(() => {
   Route.post('login', 'AuthController.login')
-  Route.post('signup', 'AuthController.signup')
+  Route.post('signup', 'AuthController.signup').middleware('auth')
   Route.get('logout', 'AuthController.logout').middleware('auth')
 
   Route.get('users/active', 'UserController.usersActive').middleware('auth')
