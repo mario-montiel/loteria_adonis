@@ -19,7 +19,7 @@ Route.get('', () => {
 Route.group(() => {
   Route.post('login', 'AuthController.login')
   Route.post('signup', 'AuthController.signup')
-  Route.get('logout', 'AuthController.logout').middleware('auth')
+  Route.get('logout', 'AuthController.logout')/*.middleware('auth')*/
 
-  Route.get('users/active', 'UserController.usersActive').middleware('auth')
+  Route.get('users/active', 'UserController.usersActive')/*.middleware('auth')*/
 }).prefix('api')
