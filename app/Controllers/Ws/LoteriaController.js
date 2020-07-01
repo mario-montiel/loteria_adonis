@@ -160,7 +160,7 @@ class LoteriaController {
         c3 = borcards.rows[9].selected
         c4 = borcards.rows[10].selected
         this._winner4(c1, c2, c3, c4)
-        this._messagewin(quien.id)
+        this._messagewin(quien.id, user.username)
         this.gano = "no"
         break
       case 'full':
@@ -173,12 +173,14 @@ class LoteriaController {
         if (this.gano == "si") {
           this.socket.broadcastToAll('onWin', {
             user_id: quien.id,
+            username: user.username,
             win: "yes"
           })
           this._finishGame()
         } else {
           this.socket.broadcastToAll('onWin', {
             user_id: quien.id,
+            username: user.username,
             win: "no"
           })
         }
@@ -244,34 +246,34 @@ class LoteriaController {
                           c4 = borcards.rows[12].selected
                           this._winner4(c1, c2, c3, c4)
                           if (this.gano == "no") {
-                            this._messagewin(quien.id)
+                            this._messagewin(quien.id, user.username)
                           }
                         } else {
-                          this._messagewin(quien.id)
+                          this._messagewin(quien.id, user.username)
                         }
                       } else {
-                        this._messagewin(quien.id)
+                        this._messagewin(quien.id, user.username)
                       }
                     } else {
-                      this._messagewin(quien.id)
+                      this._messagewin(quien.id, user.username)
                     }
                   } else {
-                    this._messagewin(quien.id)
+                    this._messagewin(quien.id, user.username)
                   }
                 } else {
-                  this._messagewin(quien.id)
+                  this._messagewin(quien.id, user.username)
                 }
               } else {
-                this._messagewin(quien.id)
+                this._messagewin(quien.id, user.username)
               }
             } else {
-              this._messagewin(quien.id)
+              this._messagewin(quien.id, user.username)
             }
           } else {
-            this._messagewin(quien.id)
+            this._messagewin(quien.id, user.username)
           }
         } else {
-          this._messagewin(quien.id)
+          this._messagewin(quien.id, user.username)
         }
         this.gano = "no"
         break
@@ -334,16 +336,18 @@ class LoteriaController {
     }
   }
 
-  async _messagewin(id) {
+  async _messagewin(id, nombre) {
     if (this.gano == "si") {
       this.socket.broadcastToAll('onWin', {
         user_id: id,
+        username: nombre,
         win: "yes"
       })
       this._finishGame()
     } else {
       this.socket.broadcastToAll('onWin', {
         user_id: id,
+        username: nombre,
         win: "no"
       })
     }
