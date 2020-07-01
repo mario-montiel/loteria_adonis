@@ -110,7 +110,7 @@ class LoteriaController {
           await game.cards().detach(card.id)
 
           socket.broadcastToAll('card', card)
-        }, 1000, this.socket, this._finishGame);
+        }, 3000, this.socket, this._finishGame);
         //await this._currCardCycle(game)
       }
 
@@ -140,6 +140,7 @@ class LoteriaController {
 
     this.socket.broadcastToAll('cardSelect', {
       user_id: data.user_id,
+      card_id: data.card_id,
       success: success
     })
   }
@@ -356,7 +357,6 @@ class LoteriaController {
 
     currentCard = { id: null, name: 'unknown', path: 'unknown' }
 
-    console.log('I finish the game')
     await Database.delete('*').from('board_has_cards')
     await Database.delete('*').from('boards')
   }
