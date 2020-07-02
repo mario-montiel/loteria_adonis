@@ -215,6 +215,20 @@ class LoteriaController {
     await user.save()
 
     this.socket.broadcastToAll('descUser', user)
+
+    this._deleteDataUser(id)
+  }
+
+  async _deleteDataUser(id) {
+    let countUsers = await Database.table('boards').count()
+    console.log(countUsers[0]['count(*)']);
+
+    if(countUsers[0]['count(*)'] > 2){
+      let user = await Database.table('boards').where('user_id', id).first()
+      await Database.table('board_has_cards').where('board_id', user.id).delete()
+      await Database.table('boards').where('user_id', id).delete()
+    }
+    else{ this._finishGame() }
   }
 
   async _broadcastBoards(user_id) {
