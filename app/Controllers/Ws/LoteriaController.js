@@ -221,7 +221,6 @@ class LoteriaController {
 
   async _deleteDataUser(id) {
     let countUsers = await Database.table('boards').count()
-    console.log(countUsers[0]['count(*)']);
 
     if(countUsers[0]['count(*)'] > 2){
       let user = await Database.table('boards').where('user_id', id).first()
