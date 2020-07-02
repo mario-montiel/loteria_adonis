@@ -3,12 +3,11 @@ const BoardCards = use('App/Models/BoardHasCard')
 const Card = use('App/Models/Card')
 const Database = use('Database')
 const Game = use('App/Models/Game')
+const GameCards = use('App/Models/GamesHasCard')
 const User = use('App/Models/User')
 const Board = use('App/Models/Board')
 
 const shuffle = require('shuffle-array')
-
-var currentCard = { id: 0, name: 'unknown', path: 'unknown' }
 
 class LoteriaController {
   constructor({ socket, request }) {
@@ -31,8 +30,8 @@ class LoteriaController {
     const newBoard = new Board();
     newBoard.user_id = id;
     await newBoard.save();
-    const card = await Card.all()
-    const shuffleCards = shuffle(card.rows)
+    const cards = await Card.all()
+    const shuffleCards = shuffle(cards.rows)
 
     for (let i = 0; i <= 15; i++) {
       const extractCard = shuffleCards.pop()
@@ -83,14 +82,12 @@ class LoteriaController {
           socket.broadcastToAll('timer', secs)
         }, 1000, this.socket)
 
-        //await this._generateCards(game)
         const cards = await Card.all()
         const rdmCards = await shuffle(cards.rows)
         await game.cards().saveMany(rdmCards)
 
         let interval2 = setInterval(async (socket, _finishGame) => {
-          let game = await Game.first()
-          let card = await game.cards().first()
+          let card = await game.cards().wherePivot('status', 'pending').first()
 
           if (!card) {
             let game = await Game.first()
@@ -106,12 +103,12 @@ class LoteriaController {
             return
           }
 
-          currentCard = card
-          await game.cards().detach(card.id)
+          let gameCard = await GameCards.findBy('card_id', card.id)
+          gameCard.status = 'has_passed'
+          await gameCard.save()
 
           socket.broadcastToAll('card', card)
         }, 3000, this.socket, this._finishGame);
-        //await this._currCardCycle(game)
       }
 
       if (status == 'playing') {
@@ -125,159 +122,89 @@ class LoteriaController {
     } else { this.socket.broadcastToAll('gameStatus', 'inactive') }
   }
 
-  async onCardSelect(data) {
-    let correctCard = data.card_id == currentCard.id ? true : false
-    let board = await BoardCards.query().where('board_id', data.board_id)
-      .andWhere('card_id', data.card_id).first()
-    let success = false
+  async onWin(data) {
+    let user = await User.find(data.id)
+    let board = await Board.findBy('user_id', user.id)
+    let boardCards = await board.boardhascard().whereIn('card_id',
+      data.selectedCards).fetch()
 
-    if (board && correctCard) {
-      success = true
+    let game = await Game.first()
+    let passedCards = await game.cards().wherePivot('status', 'has_passed').fetch()
 
-      board.selected = 1
-      board.save()
+    let validateCards = false
+    data.selectedCards.forEach(userCard => {
+      validateCards = false
+
+      passedCards.rows.forEach(card => {
+        if (userCard == card.id) {
+          validateCards = true
+        }
+      })
+    });
+
+    if (!validateCards) {
+      this.socket.broadcastToAll('onWin', {
+        user_id: data.id,
+        username: user.username,
+        win: "no"
+      })
+      return
     }
 
-    this.socket.broadcastToAll('cardSelect', {
-      user_id: data.user_id,
-      card_id: data.card_id,
-      success: success
-    })
-  }
-
-  async onWin(quien) {
-    let user = await User.find(quien.id)
-    let board = await Board.findBy('user_id', user.id)
-    let borcards = await board.boardhascard().fetch()
-    let c1 = 1
-    let c2 = 1
-    let c3 = 1
-    let c4 = 1
-    switch (quien.como) {
+    let message = 'no'
+    switch (data.como) {
       case 'centro':
-        c1 = borcards.rows[5].selected
-        c2 = borcards.rows[6].selected
-        c3 = borcards.rows[9].selected
-        c4 = borcards.rows[10].selected
-        this._winner4(c1, c2, c3, c4)
-        this._messagewin(quien.id, user.username)
-        this.gano = "no"
+        if (await this._winResult([5, 6, 9, 10], boardCards, user)) {
+          message = 'yes'
+        } else { message = 'no' }
         break
       case 'full':
-        this.gano = "si"
-        for (var i = 0; i < borcards.rows.length; i++) {
-          if (borcards.rows[i].selected == 0) {
-            this.gano = "no"
-          }
-        }
-        if (this.gano == "si") {
-          this.socket.broadcastToAll('onWin', {
-            user_id: quien.id,
-            username: user.username,
-            win: "yes"
-          })
-          this._finishGame()
-        } else {
-          this.socket.broadcastToAll('onWin', {
-            user_id: quien.id,
-            username: user.username,
-            win: "no"
-          })
-        }
+        if (boardCards.rows.length == 16) { message = 'yes' }
+        else { message = 'no' }
         break
       case 'loteria':
-        c1 = borcards.rows[0].selected
-        c2 = borcards.rows[1].selected
-        c3 = borcards.rows[2].selected
-        c4 = borcards.rows[3].selected
-        this._winner4(c1, c2, c3, c4)
-        if (this.gano == "no") {
-          c1 = borcards.rows[4].selected
-          c2 = borcards.rows[5].selected
-          c3 = borcards.rows[6].selected
-          c4 = borcards.rows[7].selected
-          this._winner4(c1, c2, c3, c4)
-          if (this.gano == "no") {
-            c1 = borcards.rows[8].selected
-            c2 = borcards.rows[9].selected
-            c3 = borcards.rows[10].selected
-            c4 = borcards.rows[11].selected
-            this._winner4(c1, c2, c3, c4)
-            if (this.gano == "no") {
-              c1 = borcards.rows[12].selected
-              c2 = borcards.rows[13].selected
-              c3 = borcards.rows[14].selected
-              c4 = borcards.rows[15].selected
-              this._winner4(c1, c2, c3, c4)
-              if (this.gano == "no") {
-                c1 = borcards.rows[0].selected
-                c2 = borcards.rows[4].selected
-                c3 = borcards.rows[8].selected
-                c4 = borcards.rows[12].selected
-                this._winner4(c1, c2, c3, c4)
-                if (this.gano == "no") {
-                  c1 = borcards.rows[1].selected
-                  c2 = borcards.rows[5].selected
-                  c3 = borcards.rows[9].selected
-                  c4 = borcards.rows[13].selected
-                  this._winner4(c1, c2, c3, c4)
-                  if (this.gano == "no") {
-                    c1 = borcards.rows[2].selected
-                    c2 = borcards.rows[6].selected
-                    c3 = borcards.rows[10].selected
-                    c4 = borcards.rows[14].selected
-                    this._winner4(c1, c2, c3, c4)
-                    if (this.gano == "no") {
-                      c1 = borcards.rows[3].selected
-                      c2 = borcards.rows[7].selected
-                      c3 = borcards.rows[11].selected
-                      c4 = borcards.rows[15].selected
-                      this._winner4(c1, c2, c3, c4)
-                      if (this.gano == "no") {
-                        c1 = borcards.rows[0].selected
-                        c2 = borcards.rows[5].selected
-                        c3 = borcards.rows[10].selected
-                        c4 = borcards.rows[15].selected
-                        this._winner4(c1, c2, c3, c4)
-                        if (this.gano == "no") {
-                          c1 = borcards.rows[3].selected
-                          c2 = borcards.rows[6].selected
-                          c3 = borcards.rows[9].selected
-                          c4 = borcards.rows[12].selected
-                          this._winner4(c1, c2, c3, c4)
-                          if (this.gano == "no") {
-                            this._messagewin(quien.id, user.username)
-                          }
-                        } else {
-                          this._messagewin(quien.id, user.username)
-                        }
-                      } else {
-                        this._messagewin(quien.id, user.username)
-                      }
-                    } else {
-                      this._messagewin(quien.id, user.username)
-                    }
-                  } else {
-                    this._messagewin(quien.id, user.username)
-                  }
-                } else {
-                  this._messagewin(quien.id, user.username)
-                }
-              } else {
-                this._messagewin(quien.id, user.username)
-              }
-            } else {
-              this._messagewin(quien.id, user.username)
-            }
-          } else {
-            this._messagewin(quien.id, user.username)
-          }
-        } else {
-          this._messagewin(quien.id, user.username)
-        }
-        this.gano = "no"
+        if ( // HORIZONTAL
+          await this._winResult([0, 1, 2, 3], boardCards) ||
+          await this._winResult([4, 5, 6, 7], boardCards) ||
+          await this._winResult([8, 9, 10, 11], boardCards) ||
+          await this._winResult([12, 13, 14, 15], boardCards) ||
+          // VERTICAL
+          await this._winResult([0, 4, 8, 12], boardCards) ||
+          await this._winResult([1, 5, 9, 13], boardCards) ||
+          await this._winResult([2, 6, 10, 14], boardCards) ||
+          await this._winResult([3, 7, 11, 15], boardCards) ||
+          // DIAGONAL
+          await this._winResult([0, 5, 10, 15], boardCards) ||
+          await this._winResult([3, 6, 9, 12], boardCards)
+        ) {
+          message = 'yes'
+        } else { message = 'no' }
         break
     }
+
+    if (message == 'yes') { this._finishGame() }
+
+    this._broadcastResult(user, message)
+  }
+
+  async _winResult(positions, boardCards) {
+    let validate = 0
+
+    await boardCards.rows.forEach(card => {
+      if (positions.includes(card.position)) { validate++ }
+    })
+
+    if (validate == 4) { return true }
+
+    return false
+  }
+
+  async _broadcastResult(user, message) {
+    this.socket.broadcastToAll('onWin', {
+      user_id: user.id,
+      username: user.username,
+      win: message
+    })
   }
 
   async onClose(id) {
@@ -303,63 +230,11 @@ class LoteriaController {
     await game.cards().saveMany(rdmCards)
   }
 
-  // Aquí cambia el ciclo de las cartas de en medio :u
-  async _currCardCycle(game) {
-    let interval = setInterval(cardCycle, 3000, this.socket, this._finishGame);
-
-    function cardCycle(socket, _finishGame) {
-      let card = game.cards().first()
-
-      if (!card) {
-        let game = Game.first()
-        if (game.status != 'inactive') {
-          _finishGame()
-          socket.broadcastToAll('onWin', {
-            user_id: 0,
-            win: "draw"
-          })
-        }
-
-        clearInterval(interval)
-      }
-
-      currentCard = card
-      game.cards().detach(currentCard.id)
-
-      socket.broadcastToAll('card', currentCard)
-    }
-  }
-
-  async _winner4(c1, c2, c3, c4) {
-    if (c1 == 1 && c2 == 1 && c3 == 1 && c4 == 1) {
-      this.gano = "si"
-    }
-  }
-
-  async _messagewin(id, nombre) {
-    if (this.gano == "si") {
-      this.socket.broadcastToAll('onWin', {
-        user_id: id,
-        username: nombre,
-        win: "yes"
-      })
-      this._finishGame()
-    } else {
-      this.socket.broadcastToAll('onWin', {
-        user_id: id,
-        username: nombre,
-        win: "no"
-      })
-    }
-  }
-
   async _finishGame() {
     let game = await Game.first()
     game.status = 'inactive'
     await game.save()
     await game.cards().detach()
-
-    currentCard = { id: null, name: 'unknown', path: 'unknown' }
 
     await Database.delete('*').from('board_has_cards')
     await Database.delete('*').from('boards')

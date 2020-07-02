@@ -8,7 +8,8 @@ class GamesHasCardsSchema extends Schema {
     this.create('games_has_cards', (table) => {
     	table.increments()
     	table.integer('game_id').unsigned().references('id').inTable('games')
-    	table.integer('card_id').unsigned().references('id').inTable('cards')
+      table.integer('card_id').unsigned().references('id').inTable('cards')
+      table.string('status', 10).defaultTo('pending') // has_passed | pending | current
     })
   }
 
