@@ -159,7 +159,10 @@ class LoteriaController {
         } else { message = 'no' }
         break
       case 'full':
-        if (boardCards.rows.length == 16) { message = 'yes' }
+        if (boardCards.rows.length == 16) { 
+          message = 'yes'
+          this._finishGame() 
+        }
         else { message = 'no' }
         break
       case 'loteria':
@@ -182,9 +185,9 @@ class LoteriaController {
         break
     }
 
-    if (message == 'yes') { this._finishGame() }
+    // if (message == 'yes') { }
 
-    this._broadcastResult(user, message)
+    this._broadcastResult(user, message, data.como)
   }
 
   async _winResult(positions, boardCards) {
@@ -199,10 +202,11 @@ class LoteriaController {
     return false
   }
 
-  async _broadcastResult(user, message) {
+  async _broadcastResult(user, message, esta) {
     this.socket.broadcastToAll('onWin', {
       user_id: user.id,
       username: user.username,
+      forma: esta,
       win: message
     })
   }
